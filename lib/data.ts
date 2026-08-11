@@ -14,7 +14,7 @@ export async function getActiveLocalities(): Promise<LocalityOption[]> {
 
   const { data, error } = await supabase
     .from("localities")
-    .select("name, slug")
+    .select("id, name, slug")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 

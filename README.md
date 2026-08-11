@@ -1,12 +1,12 @@
-# REQ V0 — Build 1
+# REQ V0 — Build 2
 
-REQ is a private, mobile-first live requirement exchange for property brokers. Build 1 makes discovery production-ready for public visitors and approved brokers while preserving the product constitution:
+REQ is a private, mobile-first live requirement exchange for property brokers. Build 2 adds secure requirement publication to the production-ready discovery experience while preserving the product constitution:
 
 **POST → MATCH → CONNECT**
 
 REQ is not a property portal, CRM, social network, permanent inventory database, or AI product.
 
-## Build 1 scope
+## Build 2 scope
 
 Included:
 
@@ -19,12 +19,16 @@ Included:
 - Minute, hour, and day freshness formatting
 - Approved-broker detail route at `/requirements/[id]`
 - Logged-out detail gating through authentication
-- Disabled final-position placeholders for `I HAVE A MATCH`, `VIEW MATCHES`, and `POST A REQ`
-- Database indexes and security regression tests for Build 1 queries
+- Approved-broker-only Post a REQ form at `/post`
+- Atomic `create_requirement` database function with server-owned lifecycle fields
+- Multi-locality publication, normalized controlled values, and layered validation
+- Seven-day live expiry and safe public-preview consent at publication
+- Disabled final-position placeholders for `I HAVE A MATCH` and `VIEW MATCHES`
+- Database security regression tests for discovery and publication
 
 Explicitly out of scope:
 
-- Posting, editing, closing, or renewing requirements
+- Editing, closing, or renewing requirements
 - Submitting matches, broker responses, or Connect
 - Phone/email exposure, notifications, push, SMS, WhatsApp, or external email systems
 - Search, analytics, reporting, account deletion, chat, CRM, inventory, social features, payments, images, or AI
@@ -66,6 +70,7 @@ Apply in order:
 2. `202608110002_build0_seed.sql`
 3. `20260811180619_harden_function_execute_privileges.sql`
 4. `20260811235507_build1_live_discovery.sql`
+5. `202608120001_build2_create_requirement.sql`
 
 The Build 0 seed creates South Delhi localities and four development/demo requirements. The Build 1 migration explicitly deletes those four known requirement IDs so they are never represented as genuine production activity.
 
@@ -86,6 +91,12 @@ The view contains no broker identity, profile/contact data, buyer type, urgency,
 Approved brokers use the separate `get_broker_live_requirements` database function. It independently verifies `auth.uid()` belongs to an approved profile and returns live requirement content plus posting broker name/company. Its return contract deliberately excludes mobile and email. Pending, suspended, rejected, and anonymous users receive no broker rows and cannot execute the function anonymously.
 
 The public UI never fetches a full requirement row and hides fields in React.
+
+## Requirement creation boundary
+
+Only authenticated profiles with `status = approved` may execute `create_requirement`. The security-definer function validates every field and every active locality, then creates the requirement and its locality rows in one transaction. It derives `broker_id` from `auth.uid()` and fixes lifecycle values server-side: live status, zero responses, zero renewals, current publication timestamps, and expiry after seven days.
+
+Anonymous users cannot execute the function. Pending, suspended, and rejected brokers are rejected inside the database even if they bypass the UI. The application has no direct requirement insert grant and uses no service-role key.
 
 ## Filtering
 
@@ -128,11 +139,12 @@ where email = 'admin@example.com';
 
 ## Tests and checks
 
-- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, and boundary checks
+- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, duplicate-submit protection, and boundary checks
 - `npm run lint` — source linting
 - `npm run build` — production compilation
 - `npm audit` — dependency audit
 - `supabase/tests/build1_security.sql` — transactional database/RLS test suite; run in the Supabase SQL editor after the Build 1 migration
+- `supabase/tests/build2_security.sql` — transactional creation/RLS test suite; run after the Build 2 migration
 
 The SQL suite rolls back all test users and requirements.
 
@@ -142,4 +154,4 @@ The production project is `shivamsood3s-projects/req`. Add the three environment
 
 ## Build boundary
 
-This repository intentionally stops after Build 1 discovery. The `+`, `POST A REQ`, `I HAVE A MATCH`, `VIEW MATCHES`, and `My REQs` controls are non-functional placeholders only. No Build 2+ product behavior is implemented.
+This repository intentionally stops after Build 2 publication. The `I HAVE A MATCH`, `VIEW MATCHES`, and `My REQs` controls remain non-functional placeholders. No Build 3+ product behavior is implemented.

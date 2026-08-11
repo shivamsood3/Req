@@ -24,7 +24,7 @@ export function AppShell({ profile, children }: { profile: BrokerProfile; childr
       <main className="app-content">{children}</main>
       <nav className="bottom-nav" aria-label="Main navigation">
         <Link href="/home" className="nav-active"><span aria-hidden="true">⌂</span>Home</Link>
-        <button type="button" disabled aria-label="Post a REQ, coming in the next build"><span className="nav-add">+</span></button>
+        <Link href="/post" aria-label="Post a REQ"><span className="nav-add">+</span></Link>
         <button type="button" disabled><span aria-hidden="true">▤</span>My REQs<small>Coming soon</small></button>
       </nav>
     </div>

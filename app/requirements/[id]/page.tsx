@@ -28,8 +28,10 @@ function DetailRow({ label, value }: { label: string; value: string | null }) {
 
 export default async function RequirementDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string | string[] }>;
 }) {
   const { user, profile } = await requireApprovedBroker();
   const { id } = await params;
@@ -40,11 +42,14 @@ export default async function RequirementDetailPage({
 
   const generatedAt = requestTimestamp();
   const isOwn = requirement.brokerId === user.id;
+  const created = (await searchParams).created === "1" && isOwn;
 
   return (
     <AppShell profile={profile}>
       <article className="requirement-detail">
         <Link className="detail-back" href="/home">← Live Market</Link>
+
+        {created ? <p className="requirement-created" role="status">Your REQ is live</p> : null}
 
         <div className="detail-status">
           <span className="live-copy">LIVE</span>

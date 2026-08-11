@@ -2,10 +2,10 @@ import { serializePublicPreview } from "./public-preview";
 import type { LocalityOption, PublicRequirementPreview } from "./types";
 
 export const developmentLocalities: LocalityOption[] = [
-  { name: "Defence Colony", slug: "defence-colony" },
-  { name: "Greater Kailash I", slug: "greater-kailash-i" },
-  { name: "New Friends Colony", slug: "new-friends-colony" },
-  { name: "Panchsheel Park", slug: "panchsheel-park" },
+  { id: "00000000-0000-4000-8000-000000000001", name: "Defence Colony", slug: "defence-colony" },
+  { id: "00000000-0000-4000-8000-000000000002", name: "Greater Kailash I", slug: "greater-kailash-i" },
+  { id: "00000000-0000-4000-8000-000000000003", name: "New Friends Colony", slug: "new-friends-colony" },
+  { id: "00000000-0000-4000-8000-000000000004", name: "Panchsheel Park", slug: "panchsheel-park" },
 ];
 
 // These fixtures are used only by `next dev` when Supabase is not configured.

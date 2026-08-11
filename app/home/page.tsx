@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { FeedFilters } from "@/components/feed-filters";
 import { RequirementCard } from "@/components/requirement-card";
@@ -53,10 +54,7 @@ export default async function BrokerHomePage({
         <section className="app-empty-state">
           <h2>No live REQs right now.</h2>
           <p>Have an active buyer?</p>
-          <button type="button" disabled>
-            Post a REQ
-            <span>Available in Build 2</span>
-          </button>
+          <Link href="/post">Post a REQ</Link>
         </section>
       )}
     </AppShell>

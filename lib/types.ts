@@ -41,8 +41,28 @@ export type PropertyTypeKey =
   | "other";
 
 export type LocalityOption = {
+  id: string;
   name: string;
   slug: string;
+};
+
+export type SizeUnit = "sq yd" | "sq ft" | "acre";
+export type FloorPreference = "Ground" | "First" | "Second" | "Third" | "Top" | "Any";
+export type BuyerType = "End User" | "Developer" | "Investor" | "Corporate" | "Other";
+export type Urgency = "Immediate" | "Active" | "Flexible";
+
+export type CreateRequirementInput = {
+  localityIds: string[];
+  propertyType: PropertyTypeKey;
+  budgetMin: number;
+  budgetMax: number;
+  sizeMin: number | null;
+  sizeMax: number | null;
+  sizeUnit: SizeUnit | null;
+  floorPreference: FloorPreference | null;
+  buyerType: BuyerType | null;
+  urgency: Urgency | null;
+  notes: string | null;
 };
 
 export type BrokerRequirement = PublicRequirementPreview & {
