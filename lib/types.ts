@@ -19,14 +19,40 @@ export type BrokerProfile = {
 
 export type PublicRequirementPreview = {
   id: string;
-  locality: string;
-  localitySlug: string;
+  localityNames: string[];
+  localitySlugs: string[];
+  propertyTypeKey: PropertyTypeKey;
   propertyType: string;
+  budgetMin: number;
+  budgetMax: number;
   budgetLabel: string;
   sizeLabel: string;
   floorPreference: string | null;
   responseCount: number;
   liveSince: string;
+};
+
+export type PropertyTypeKey =
+  | "floor"
+  | "house-plot"
+  | "apartment"
+  | "commercial"
+  | "land"
+  | "other";
+
+export type LocalityOption = {
+  name: string;
+  slug: string;
+};
+
+export type BrokerRequirement = PublicRequirementPreview & {
+  brokerId: string | null;
+  brokerName: string | null;
+  brokerage: string | null;
+  buyerType: string | null;
+  urgency: string | null;
+  notes: string | null;
+  expiresAt: string;
 };
 
 export type ActionState = {
