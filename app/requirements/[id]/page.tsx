@@ -2,14 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { OwnerLifecycleActions } from "@/components/owner-lifecycle-actions";
 import { requireApprovedBroker } from "@/lib/auth";
-import { getBrokerRequirement } from "@/lib/data";
+import { getBrokerRequirement, getOwnRequirement } from "@/lib/data";
 import {
   formatExpiry,
-  formatFreshness,
+  formatHistoryTiming,
+  formatRequirementActivity,
   formatResponseCount,
+  isExpiring,
   requestTimestamp,
 } from "@/lib/requirement-format";
+import type { OwnerRequirement } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Requirement" };
 export const dynamic = "force-dynamic";
@@ -26,35 +30,57 @@ function DetailRow({ label, value }: { label: string; value: string | null }) {
   );
 }
 
+function isOwnerRequirement(requirement: object): requirement is OwnerRequirement {
+  return "effectiveStatus" in requirement;
+}
+
 export default async function RequirementDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string | string[] }>;
+  searchParams: Promise<{ created?: string | string[]; updated?: string | string[]; renewed?: string | string[] }>;
 }) {
   const { user, profile } = await requireApprovedBroker();
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
-  const requirement = await getBrokerRequirement(id);
+  const ownRequirement = await getOwnRequirement(id);
+  const requirement = ownRequirement ?? await getBrokerRequirement(id);
   if (!requirement) notFound();
 
   const generatedAt = requestTimestamp();
   const isOwn = requirement.brokerId === user.id;
-  const created = (await searchParams).created === "1" && isOwn;
+  const query = await searchParams;
+  const created = query.created === "1" && isOwn;
+  const updated = query.updated === "1" && isOwn;
+  const renewed = query.renewed === "1" && isOwn;
+  const ownerItem = isOwnerRequirement(requirement) ? requirement : null;
+  const effectiveStatus = ownerItem?.effectiveStatus ?? "live";
+  const expiring = effectiveStatus === "live" && isExpiring(requirement.expiresAt, generatedAt);
+  const statusTiming = effectiveStatus === "live"
+    ? formatRequirementActivity(requirement.liveSince, requirement.updatedAt, generatedAt)
+    : formatHistoryTiming(
+        effectiveStatus,
+        effectiveStatus === "closed" ? ownerItem?.closedAt ?? requirement.updatedAt : requirement.expiresAt,
+        generatedAt,
+      );
 
   return (
-    <AppShell profile={profile}>
+    <AppShell profile={profile} activeNav={isOwn ? "my-reqs" : "home"}>
       <article className="requirement-detail">
-        <Link className="detail-back" href="/home">← Live Market</Link>
+        <Link className="detail-back" href={isOwn ? "/my-reqs" : "/home"}>
+          ← {isOwn ? "My REQs" : "Live Market"}
+        </Link>
 
         {created ? <p className="requirement-created" role="status">Your REQ is live</p> : null}
+        {updated ? <p className="requirement-created" role="status">REQ updated</p> : null}
+        {renewed ? <p className="requirement-created" role="status">REQ renewed for 7 days</p> : null}
 
         <div className="detail-status">
-          <span className="live-copy">LIVE</span>
+          <span className={effectiveStatus === "live" ? "live-copy" : undefined}>{effectiveStatus.toUpperCase()}</span>
           <span aria-hidden="true">·</span>
-          <span>{formatFreshness(requirement.liveSince, generatedAt)}</span>
+          <span>{statusTiming}</span>
         </div>
 
         <section className="detail-hero">
@@ -79,13 +105,29 @@ export default async function RequirementDetailPage({
 
         <div className="detail-timing">
           <p>{formatResponseCount(requirement.responseCount)}</p>
-          <p>{formatExpiry(requirement.expiresAt, generatedAt)}</p>
+          {effectiveStatus === "live" ? <p>{formatExpiry(requirement.expiresAt, generatedAt)}</p> : null}
         </div>
 
-        <button className="detail-future-action" type="button" disabled>
-          {isOwn ? "View matches" : "I have a match"}
-          <span>Available in a future build</span>
-        </button>
+        {isOwn && ownerItem ? (
+          <div className="detail-owner-actions">
+            <OwnerLifecycleActions
+              requirementId={requirement.id}
+              status={ownerItem.effectiveStatus}
+              expiring={expiring}
+            />
+            {effectiveStatus === "live" ? (
+              <button className="detail-future-action" type="button" disabled>
+                View matches
+                <span>Available in a future build</span>
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <button className="detail-future-action" type="button" disabled>
+            I have a match
+            <span>Available in a future build</span>
+          </button>
+        )}
       </article>
     </AppShell>
   );

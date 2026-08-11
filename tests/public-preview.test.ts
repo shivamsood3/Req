@@ -16,6 +16,7 @@ const databaseRow = {
   floor_preference: "First floor preferred",
   response_count: 4,
   live_since: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
 };
 
 test("public preview exposes one aggregated locality list and no private fields", () => {

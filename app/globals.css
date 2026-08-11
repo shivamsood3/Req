@@ -202,6 +202,43 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .post-unavailable { margin-top: 30px; padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .post-unavailable h2 { margin: 0; font-size: 18px; }
 .post-unavailable p { margin: 8px 0 0; color: var(--secondary); font-size: 13px; line-height: 1.5; }
+.post-unavailable .secondary-button { margin-top: 18px; }
+
+.my-reqs-heading { margin-bottom: 24px; }
+.req-tabs { margin-bottom: 27px; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); }
+.req-tabs a { padding: 0 4px 12px; color: var(--secondary); text-align: center; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.req-tabs .req-tab-active { margin-bottom: -1px; border-bottom: 2px solid var(--text); color: var(--text); }
+.my-reqs-empty { margin-top: 8px; }
+.owner-groups { display: grid; gap: 32px; }
+.owner-group > h2 { margin: 0 0 12px; color: var(--secondary); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.owner-card-list { display: grid; gap: 11px; }
+.owner-req-card { padding: 18px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface); }
+.owner-status { margin-bottom: 14px; display: flex; align-items: center; gap: 6px; color: var(--secondary); font-size: 10px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.owner-status-live { color: var(--green); }
+.owner-status-expiring { color: #a15c00; }
+.owner-status-expiring .live-dot { background: #d97706; }
+.owner-req-card .locality { margin-bottom: 6px; }
+.owner-req-card h3 { margin: 0; font-size: 24px; letter-spacing: -.035em; }
+.owner-property { margin: 7px 0 0; font-size: 14px; font-weight: 650; }
+.owner-updated { margin: 13px 0 0; color: var(--secondary); font-size: 10px; font-weight: 750; letter-spacing: .07em; }
+.owner-card-meta { margin-top: 18px; padding-top: 14px; display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--border); color: var(--secondary); font-size: 11px; }
+.owner-actions { margin-top: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 15px; }
+.owner-actions > a, .owner-actions > button, .owner-actions form > button, .history-actions > a { padding: 0; border: 0; background: transparent; color: var(--text); font-size: 10px; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; cursor: pointer; }
+.owner-actions .close-trigger { color: var(--danger); }
+.owner-actions form { margin: 0; }
+.owner-actions .field-error { flex-basis: 100%; }
+.owner-action-form { width: 100%; margin: 0; }
+.owner-primary-action { width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: 9px; background: var(--text); color: white; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.history-actions { margin-top: 15px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; }
+.history-actions .owner-action-form { justify-self: end; width: min(100%, 180px); }
+.close-sheet { padding-top: 25px; }
+.close-sheet h2 { margin-right: 0; }
+.close-sheet-actions { display: grid; gap: 9px; }
+.danger-button { min-height: 49px; border: 0; border-radius: 10px; background: var(--danger); color: white; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; cursor: pointer; }
+.danger-button:disabled, .owner-primary-action:disabled, .owner-actions button:disabled { opacity: .55; cursor: wait; }
+.detail-owner-actions { margin-top: 3px; }
+.detail-owner-actions > .owner-actions { padding: 17px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.detail-owner-actions > .owner-action-form { margin-top: 3px; }
 
 .admin-shell { min-height: 100svh; }
 .admin-header { height: 68px; padding: 0 max(20px, calc((100vw - 1060px)/2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }

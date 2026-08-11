@@ -1,12 +1,12 @@
-# REQ V0 — Build 2
+# REQ V0 — Build 3
 
-REQ is a private, mobile-first live requirement exchange for property brokers. Build 2 adds secure requirement publication to the production-ready discovery experience while preserving the product constitution:
+REQ is a private, mobile-first live requirement exchange for property brokers. Build 3 adds owner lifecycle management to secure publication and discovery while preserving the product constitution:
 
 **POST → MATCH → CONNECT**
 
 REQ is not a property portal, CRM, social network, permanent inventory database, or AI product.
 
-## Build 2 scope
+## Build 3 scope
 
 Included:
 
@@ -23,12 +23,18 @@ Included:
 - Atomic `create_requirement` database function with server-owned lifecycle fields
 - Multi-locality publication, normalized controlled values, and layered validation
 - Seven-day live expiry and safe public-preview consent at publication
+- Owner-only `My REQs` at `/my-reqs`, grouped into Active, Expiring, and History
+- Posted and Responded tabs with a truthful empty Responded state until matching exists
+- Owner-only editing for effectively live requirements without changing feed position or expiry
+- Confirmed owner-only closing with immediate removal from live discovery
+- `Keep Live` during the final 24 hours and `Make Live Again` for expired or closed requirements
+- Updated freshness that distinguishes material edits from original publication freshness
+- Owner history detail access without exposing another broker's closed or expired requirements
 - Disabled final-position placeholders for `I HAVE A MATCH` and `VIEW MATCHES`
-- Database security regression tests for discovery and publication
+- Database security regression tests for discovery, publication, and lifecycle ownership
 
 Explicitly out of scope:
 
-- Editing, closing, or renewing requirements
 - Submitting matches, broker responses, or Connect
 - Phone/email exposure, notifications, push, SMS, WhatsApp, or external email systems
 - Search, analytics, reporting, account deletion, chat, CRM, inventory, social features, payments, images, or AI
@@ -71,6 +77,7 @@ Apply in order:
 3. `20260811180619_harden_function_execute_privileges.sql`
 4. `20260811235507_build1_live_discovery.sql`
 5. `202608120001_build2_create_requirement.sql`
+6. `202608120002_build3_requirement_lifecycle.sql`
 
 The Build 0 seed creates South Delhi localities and four development/demo requirements. The Build 1 migration explicitly deletes those four known requirement IDs so they are never represented as genuine production activity.
 
@@ -92,11 +99,24 @@ Approved brokers use the separate `get_broker_live_requirements` database functi
 
 The public UI never fetches a full requirement row and hides fields in React.
 
+Build 3 further narrows the authenticated row policy: approved brokers can read other brokers' requirements only while those requirements are effectively live. Closed and expired rows remain available solely to their owner through the owner-scoped lifecycle function. Public and authenticated live feeds continue to enforce `status = live AND expires_at > now()` in database access.
+
 ## Requirement creation boundary
 
 Only authenticated profiles with `status = approved` may execute `create_requirement`. The security-definer function validates every field and every active locality, then creates the requirement and its locality rows in one transaction. It derives `broker_id` from `auth.uid()` and fixes lifecycle values server-side: live status, zero responses, zero renewals, current publication timestamps, and expiry after seven days.
 
 Anonymous users cannot execute the function. Pending, suspended, and rejected brokers are rejected inside the database even if they bypass the UI. The application has no direct requirement insert grant and uses no service-role key.
+
+## Requirement lifecycle boundary
+
+Only an approved requirement owner may execute the Build 3 lifecycle functions:
+
+- `get_own_requirements` returns only the current user's requirements, including owner history.
+- `update_own_requirement` accepts effectively live requirements only, revalidates all controlled fields and active localities, and replaces locality rows atomically. It cannot change `live_since`, `expires_at`, status, renewal count, or response count.
+- `close_own_requirement` closes an effectively live requirement and records `closed_at`.
+- `renew_own_requirement` allows `Keep Live` only during the final 24 hours, or makes an expired/closed requirement live for a fresh seven-day window. Renewal explicitly changes `live_since`; ordinary editing never does.
+
+All functions derive ownership from `auth.uid()`, reject anonymous and non-approved profiles, and expose no broker contact information.
 
 ## Filtering
 
@@ -119,7 +139,7 @@ In **Supabase → Authentication → URL Configuration**:
 - Production Site URL: `https://req-sand.vercel.app`
 - Production redirect: `https://req-sand.vercel.app/auth/callback`
 
-Magic links use Supabase's built-in email delivery. No external email provider is part of Build 1.
+Magic links use Supabase's built-in email delivery. No external email provider is part of REQ V0.
 
 ## Create the first admin
 
@@ -139,12 +159,13 @@ where email = 'admin@example.com';
 
 ## Tests and checks
 
-- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, duplicate-submit protection, and boundary checks
+- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, lifecycle grouping, ownership, and boundary checks
 - `npm run lint` — source linting
 - `npm run build` — production compilation
 - `npm audit` — dependency audit
 - `supabase/tests/build1_security.sql` — transactional database/RLS test suite; run in the Supabase SQL editor after the Build 1 migration
 - `supabase/tests/build2_security.sql` — transactional creation/RLS test suite; run after the Build 2 migration
+- `supabase/tests/build3_security.sql` — transactional owner lifecycle/RLS test suite; run after the Build 3 migration
 
 The SQL suite rolls back all test users and requirements.
 
@@ -154,4 +175,4 @@ The production project is `shivamsood3s-projects/req`. Add the three environment
 
 ## Build boundary
 
-This repository intentionally stops after Build 2 publication. The `I HAVE A MATCH`, `VIEW MATCHES`, and `My REQs` controls remain non-functional placeholders. No Build 3+ product behavior is implemented.
+This repository intentionally stops after Build 3 lifecycle management. `My REQs` is functional for posted requirements, while its Responded tab remains a truthful empty state. `I HAVE A MATCH` and `VIEW MATCHES` remain non-functional placeholders. No Build 4+ matching, Connect, or later product behavior is implemented.

@@ -21,6 +21,7 @@ const preview = serializePublicPreview({
   floor_preference: null,
   response_count: 3,
   live_since: "2026-08-11T12:00:00.000Z",
+  updated_at: "2026-08-11T12:00:00.000Z",
 });
 
 test("location filter accepts multiple allowed localities and rejects unknown slugs", () => {

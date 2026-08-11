@@ -26,6 +26,7 @@ export function developmentPreviews(now = Date.now()): PublicRequirementPreview[
       floor_preference: "First floor preferred",
       response_count: 4,
       live_since: new Date(now - 12 * 60_000).toISOString(),
+      updated_at: new Date(now - 12 * 60_000).toISOString(),
     },
     {
       id: "b1000000-0000-4000-8000-000000000002",
@@ -40,6 +41,7 @@ export function developmentPreviews(now = Date.now()): PublicRequirementPreview[
       floor_preference: "Upper ground or first floor",
       response_count: 7,
       live_since: new Date(now - 3 * 3_600_000).toISOString(),
+      updated_at: new Date(now - 3 * 3_600_000).toISOString(),
     },
     {
       id: "b1000000-0000-4000-8000-000000000003",
@@ -54,6 +56,7 @@ export function developmentPreviews(now = Date.now()): PublicRequirementPreview[
       floor_preference: "Full building",
       response_count: 2,
       live_since: new Date(now - 2 * 86_400_000).toISOString(),
+      updated_at: new Date(now - 2 * 86_400_000).toISOString(),
     },
     {
       id: "b1000000-0000-4000-8000-000000000004",
@@ -68,6 +71,7 @@ export function developmentPreviews(now = Date.now()): PublicRequirementPreview[
       floor_preference: "Second floor with terrace",
       response_count: 5,
       live_since: new Date(now - 87 * 60_000).toISOString(),
+      updated_at: new Date(now - 87 * 60_000).toISOString(),
     },
   ].map(serializePublicPreview);
 }

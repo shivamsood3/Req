@@ -18,6 +18,7 @@ export type SafeRequirementRow = {
   floor_preference: string | null;
   response_count: number;
   live_since: string;
+  updated_at: string;
 };
 
 function optionalNumber(value: number | string | null) {
@@ -29,6 +30,8 @@ export function serializePublicPreview(
 ): PublicRequirementPreview {
   const budgetMin = Number(row.budget_min);
   const budgetMax = Number(row.budget_max);
+  const sizeMin = optionalNumber(row.size_min);
+  const sizeMax = optionalNumber(row.size_max);
 
   return {
     id: row.id,
@@ -39,13 +42,17 @@ export function serializePublicPreview(
     budgetMin,
     budgetMax,
     budgetLabel: formatBudgetRange(budgetMin, budgetMax),
+    sizeMin,
+    sizeMax,
+    sizeUnit: row.size_unit,
     sizeLabel: formatSizeRange(
-      optionalNumber(row.size_min),
-      optionalNumber(row.size_max),
+      sizeMin,
+      sizeMax,
       row.size_unit,
     ),
     floorPreference: row.floor_preference,
     responseCount: row.response_count,
     liveSince: row.live_since,
+    updatedAt: row.updated_at,
   };
 }

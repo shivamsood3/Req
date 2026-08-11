@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {
-  formatFreshness,
+  formatRequirementActivity,
   formatLocalitySummary,
   formatResponseCount,
 } from "@/lib/requirement-format";
@@ -43,7 +43,7 @@ export function RequirementCard({
       <div className="card-status">
         <span className="live-copy">LIVE</span>
         <span aria-hidden="true">·</span>
-        <span>{formatFreshness(item.liveSince, generatedAt)}</span>
+        <span>{formatRequirementActivity(item.liveSince, item.updatedAt, generatedAt)}</span>
       </div>
 
       {brokerItem ? (

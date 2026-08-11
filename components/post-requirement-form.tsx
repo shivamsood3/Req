@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { createRequirement, type CreateRequirementActionState } from "@/app/post/actions";
+import { updateRequirement } from "@/app/requirements/[id]/edit/actions";
 import {
   BUYER_TYPES,
   CREATE_PROPERTY_TYPES,
@@ -9,6 +10,7 @@ import {
   SIZE_UNITS,
   URGENCIES,
 } from "@/lib/create-requirement";
+import type { CreateRequirementFields } from "@/lib/create-requirement";
 import type { LocalityOption } from "@/lib/types";
 
 const initialState: CreateRequirementActionState = {};
@@ -40,9 +42,21 @@ function ChoiceGroup({
   );
 }
 
-export function PostRequirementForm({ localities }: { localities: LocalityOption[] }) {
-  const [state, formAction, pending] = useActionState(createRequirement, initialState);
-  const [locationRows, setLocationRows] = useState([""]);
+function RequirementForm({
+  localities,
+  mode,
+  requirementId,
+  initialValues,
+}: {
+  localities: LocalityOption[];
+  mode: "post" | "edit";
+  requirementId?: string;
+  initialValues?: CreateRequirementFields;
+}) {
+  const action = mode === "edit" ? updateRequirement : createRequirement;
+  const [state, formAction, pending] = useActionState(action, initialValues ? { values: initialValues } : initialState);
+  const values = state.values ?? initialValues;
+  const [locationRows, setLocationRows] = useState(initialValues?.localityIds.length ? initialValues.localityIds : [""]);
   const submittingRef = useRef(false);
 
   useEffect(() => {
@@ -67,7 +81,8 @@ export function PostRequirementForm({ localities }: { localities: LocalityOption
   }
 
   return (
-    <form className="post-form" action={formAction} key={state.values ? JSON.stringify(state.values) : "initial"} onSubmit={preventDuplicateSubmit}>
+    <form className="post-form" action={formAction} key={values ? JSON.stringify(values) : "initial"} onSubmit={preventDuplicateSubmit}>
+      {requirementId ? <input name="requirement_id" type="hidden" value={requirementId} /> : null}
       {state.errors?.form ? <p className="form-error" role="alert">{state.errors.form}</p> : null}
 
       <fieldset className="post-fieldset">
@@ -107,16 +122,16 @@ export function PostRequirementForm({ localities }: { localities: LocalityOption
 
       <fieldset className="post-fieldset">
         <legend>Property type <span>*</span></legend>
-        <ChoiceGroup name="property_type" choices={CREATE_PROPERTY_TYPES} required selected={state.values?.propertyType} />
+        <ChoiceGroup name="property_type" choices={CREATE_PROPERTY_TYPES} required selected={values?.propertyType} />
         <FieldError message={state.errors?.propertyType} />
       </fieldset>
 
       <fieldset className="post-fieldset">
         <legend>Budget <span>*</span></legend>
         <div className="range-fields budget-range">
-          <label><span>₹</span><input name="budget_min" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="12" required defaultValue={state.values?.budgetMin} /><small>Cr</small></label>
+          <label><span>₹</span><input name="budget_min" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="12" required defaultValue={values?.budgetMin} /><small>Cr</small></label>
           <b>to</b>
-          <label><span>₹</span><input name="budget_max" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="15" required defaultValue={state.values?.budgetMax} /><small>Cr</small></label>
+          <label><span>₹</span><input name="budget_max" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="15" required defaultValue={values?.budgetMax} /><small>Cr</small></label>
         </div>
         <FieldError message={state.errors?.budgetMin ?? state.errors?.budgetMax} />
       </fieldset>
@@ -124,10 +139,10 @@ export function PostRequirementForm({ localities }: { localities: LocalityOption
       <fieldset className="post-fieldset">
         <legend>Size</legend>
         <div className="range-fields size-range">
-          <input aria-label="Minimum size" name="size_min" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="325" defaultValue={state.values?.sizeMin} />
+          <input aria-label="Minimum size" name="size_min" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="325" defaultValue={values?.sizeMin} />
           <b>to</b>
-          <input aria-label="Maximum size" name="size_max" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="500" defaultValue={state.values?.sizeMax} />
-          <select aria-label="Size unit" name="size_unit" defaultValue={state.values?.sizeUnit || "sq yd"}>
+          <input aria-label="Maximum size" name="size_max" type="number" inputMode="decimal" min="0.01" step="0.01" placeholder="500" defaultValue={values?.sizeMax} />
+          <select aria-label="Size unit" name="size_unit" defaultValue={values?.sizeUnit || "sq yd"}>
             {SIZE_UNITS.map((unit) => <option key={unit} value={unit}>{unit}</option>)}
           </select>
         </div>
@@ -136,39 +151,68 @@ export function PostRequirementForm({ localities }: { localities: LocalityOption
 
       <fieldset className="post-fieldset">
         <legend>Floor</legend>
-        <ChoiceGroup name="floor_preference" choices={FLOOR_PREFERENCES.map((value) => ({ value, label: value }))} selected={state.values?.floorPreference} />
+        <ChoiceGroup name="floor_preference" choices={FLOOR_PREFERENCES.map((value) => ({ value, label: value }))} selected={values?.floorPreference} />
         <FieldError message={state.errors?.floorPreference} />
       </fieldset>
 
       <fieldset className="post-fieldset">
         <legend>Buyer type</legend>
-        <ChoiceGroup name="buyer_type" choices={BUYER_TYPES.map((value) => ({ value, label: value }))} selected={state.values?.buyerType} />
+        <ChoiceGroup name="buyer_type" choices={BUYER_TYPES.map((value) => ({ value, label: value }))} selected={values?.buyerType} />
         <FieldError message={state.errors?.buyerType} />
       </fieldset>
 
       <fieldset className="post-fieldset">
         <legend>Urgency</legend>
-        <ChoiceGroup name="urgency" choices={URGENCIES.map((value) => ({ value, label: value }))} selected={state.values?.urgency} />
+        <ChoiceGroup name="urgency" choices={URGENCIES.map((value) => ({ value, label: value }))} selected={values?.urgency} />
         <FieldError message={state.errors?.urgency} />
       </fieldset>
 
       <div className="post-fieldset notes-field">
         <label htmlFor="requirement-notes">Notes</label>
-        <textarea id="requirement-notes" name="notes" maxLength={500} rows={5} placeholder="Anything useful for an approved broker evaluating the requirement." defaultValue={state.values?.notes} />
+        <textarea id="requirement-notes" name="notes" maxLength={500} rows={5} placeholder="Anything useful for an approved broker evaluating the requirement." defaultValue={values?.notes} />
         <div className="notes-help"><span>Do not include phone numbers or private buyer information.</span><span>500 max</span></div>
         <FieldError message={state.errors?.notes} />
       </div>
 
-      <div className="post-consent">
-        <p>Your location, budget, property type, broad size, floor preference, freshness and response count will appear in the public preview.</p>
-        <p>Your identity, contact details, buyer details and notes stay inside the approved broker network. By posting, you agree to publish that safe preview for 7 days.</p>
-      </div>
+      {mode === "post" ? (
+        <div className="post-consent">
+          <p>Your location, budget, property type, broad size, floor preference, freshness and response count will appear in the public preview.</p>
+          <p>Your identity, contact details, buyer details and notes stay inside the approved broker network. By posting, you agree to publish that safe preview for 7 days.</p>
+        </div>
+      ) : (
+        <div className="post-consent">
+          <p>Safe preview fields update publicly. Editing does not move this REQ up the feed or extend its expiry.</p>
+        </div>
+      )}
 
       <div className="post-submit-bar">
         <button className="primary-button" type="submit" disabled={pending}>
-          {pending ? "Posting…" : "Post live"}
+          {pending ? (mode === "post" ? "Posting…" : "Saving…") : (mode === "post" ? "Post live" : "Save changes")}
         </button>
       </div>
     </form>
+  );
+}
+
+export function PostRequirementForm({ localities }: { localities: LocalityOption[] }) {
+  return <RequirementForm localities={localities} mode="post" />;
+}
+
+export function EditRequirementForm({
+  localities,
+  requirementId,
+  initialValues,
+}: {
+  localities: LocalityOption[];
+  requirementId: string;
+  initialValues: CreateRequirementFields;
+}) {
+  return (
+    <RequirementForm
+      localities={localities}
+      mode="edit"
+      requirementId={requirementId}
+      initialValues={initialValues}
+    />
   );
 }

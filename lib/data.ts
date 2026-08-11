@@ -1,10 +1,11 @@
 import { serializeBrokerRequirement, type BrokerRequirementRow } from "./broker-requirement";
 import { developmentLocalities, developmentPreviews } from "./dev-fixtures";
 import { previewMatchesFilters, type FeedFilters } from "./feed-filters";
+import { serializeOwnerRequirement, type OwnerRequirementRow } from "./owner-requirement";
 import { serializePublicPreview, type SafeRequirementRow } from "./public-preview";
 import { createPublicClient } from "./supabase/public";
 import { createClient } from "./supabase/server";
-import type { BrokerRequirement, LocalityOption, PublicRequirementPreview } from "./types";
+import type { BrokerRequirement, LocalityOption, OwnerRequirement, PublicRequirementPreview } from "./types";
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
@@ -95,4 +96,27 @@ export async function getBrokerRequirement(id: string) {
 
   const row = (data?.[0] as BrokerRequirementRow | undefined) ?? null;
   return row ? serializeBrokerRequirement(row) : null;
+}
+
+export async function getOwnRequirements(): Promise<OwnerRequirement[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase.rpc("get_own_requirements", {
+    p_requirement_id: null,
+  });
+  if (error) throw new Error("Unable to load your requirements");
+  return ((data ?? []) as OwnerRequirementRow[]).map(serializeOwnerRequirement);
+}
+
+export async function getOwnRequirement(id: string): Promise<OwnerRequirement | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.rpc("get_own_requirements", {
+    p_requirement_id: id,
+  });
+  if (error) throw new Error("Unable to load your requirement");
+  const row = (data?.[0] as OwnerRequirementRow | undefined) ?? null;
+  return row ? serializeOwnerRequirement(row) : null;
 }

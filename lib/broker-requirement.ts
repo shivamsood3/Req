@@ -20,6 +20,7 @@ export type BrokerRequirementRow = {
   notes: string | null;
   response_count: number;
   live_since: string;
+  updated_at: string;
   expires_at: string;
 };
 

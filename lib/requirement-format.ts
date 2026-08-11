@@ -45,7 +45,11 @@ export function formatLocalitySummary(localities: string[]) {
 }
 
 export function formatFreshness(liveSince: string, now = Date.now()) {
-  const elapsed = Math.max(0, now - new Date(liveSince).getTime());
+  return formatElapsed(liveSince, now);
+}
+
+export function formatElapsed(timestamp: string, now = Date.now()) {
+  const elapsed = Math.max(0, now - new Date(timestamp).getTime());
   const minutes = Math.max(1, Math.floor(elapsed / 60_000));
   if (minutes < 60) return `${minutes} MIN AGO`;
 
@@ -55,8 +59,26 @@ export function formatFreshness(liveSince: string, now = Date.now()) {
   return `${Math.floor(hours / 24)} DAYS AGO`;
 }
 
+export function isMateriallyUpdated(liveSince: string, updatedAt: string) {
+  return new Date(updatedAt).getTime() - new Date(liveSince).getTime() >= 60_000;
+}
+
+export function formatRequirementActivity(
+  liveSince: string,
+  updatedAt: string,
+  now = Date.now(),
+) {
+  return isMateriallyUpdated(liveSince, updatedAt)
+    ? `UPDATED ${formatElapsed(updatedAt, now)}`
+    : formatFreshness(liveSince, now);
+}
+
 export function formatResponseCount(count: number) {
   return `${count} ${count === 1 ? "broker" : "brokers"} responded`;
+}
+
+export function formatMatchCount(count: number) {
+  return `${count} ${count === 1 ? "match" : "matches"}`;
 }
 
 export function formatExpiry(expiresAt: string, now = Date.now()) {
@@ -68,6 +90,20 @@ export function formatExpiry(expiresAt: string, now = Date.now()) {
 
   const days = Math.ceil(hours / 24);
   return `Expires in ${days} ${days === 1 ? "day" : "days"}`;
+}
+
+export function formatHistoryTiming(
+  status: "closed" | "expired",
+  timestamp: string,
+  now = Date.now(),
+) {
+  const label = status === "closed" ? "Closed" : "Expired";
+  return `${label} ${formatElapsed(timestamp, now).toLowerCase()}`;
+}
+
+export function isExpiring(expiresAt: string, now = Date.now()) {
+  const remaining = new Date(expiresAt).getTime() - now;
+  return remaining > 0 && remaining <= 24 * 3_600_000;
 }
 
 export function requestTimestamp() {

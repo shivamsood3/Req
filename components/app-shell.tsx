@@ -11,7 +11,15 @@ function initials(name: string | null) {
     .toUpperCase();
 }
 
-export function AppShell({ profile, children }: { profile: BrokerProfile; children: React.ReactNode }) {
+export function AppShell({
+  profile,
+  children,
+  activeNav = "home",
+}: {
+  profile: BrokerProfile;
+  children: React.ReactNode;
+  activeNav?: "home" | "my-reqs" | null;
+}) {
   return (
     <div className="app-frame">
       <header className="app-topbar">
@@ -23,9 +31,9 @@ export function AppShell({ profile, children }: { profile: BrokerProfile; childr
       </header>
       <main className="app-content">{children}</main>
       <nav className="bottom-nav" aria-label="Main navigation">
-        <Link href="/home" className="nav-active"><span aria-hidden="true">⌂</span>Home</Link>
+        <Link href="/home" className={activeNav === "home" ? "nav-active" : undefined}><span aria-hidden="true">⌂</span>Home</Link>
         <Link href="/post" aria-label="Post a REQ"><span className="nav-add">+</span></Link>
-        <button type="button" disabled><span aria-hidden="true">▤</span>My REQs<small>Coming soon</small></button>
+        <Link href="/my-reqs" className={activeNav === "my-reqs" ? "nav-active" : undefined}><span aria-hidden="true">▤</span>My REQs</Link>
       </nav>
     </div>
   );

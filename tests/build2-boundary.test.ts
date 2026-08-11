@@ -40,10 +40,10 @@ test("post route is approved-only and has no upload, AI, match, or Connect flow"
 
 test("duplicate submit protection disables the live action while pending", async () => {
   const form = await readFile(formPath, "utf8");
-  assert.match(form, /useActionState\(createRequirement/);
+  assert.match(form, /useActionState\(action/);
   assert.match(form, /disabled=\{pending\}/);
   assert.match(form, /submittingRef\.current/);
-  assert.match(form, /pending \? "Posting…" : "Post live"/);
+  assert.match(form, /mode === "post" \? "Posting…" : "Saving…"/);
 });
 
 test("public-preview consent clearly separates public and approved-broker fields", async () => {

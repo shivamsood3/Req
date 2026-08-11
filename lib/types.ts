@@ -26,10 +26,14 @@ export type PublicRequirementPreview = {
   budgetMin: number;
   budgetMax: number;
   budgetLabel: string;
+  sizeMin: number | null;
+  sizeMax: number | null;
+  sizeUnit: string | null;
   sizeLabel: string;
   floorPreference: string | null;
   responseCount: number;
   liveSince: string;
+  updatedAt: string;
 };
 
 export type PropertyTypeKey =
@@ -73,6 +77,18 @@ export type BrokerRequirement = PublicRequirementPreview & {
   urgency: string | null;
   notes: string | null;
   expiresAt: string;
+};
+
+export type RequirementStatus = "live" | "closed" | "expired";
+export type EffectiveRequirementStatus = RequirementStatus;
+
+export type OwnerRequirement = BrokerRequirement & {
+  localityIds: string[];
+  storedStatus: RequirementStatus;
+  effectiveStatus: EffectiveRequirementStatus;
+  createdAt: string;
+  closedAt: string | null;
+  renewalCount: number;
 };
 
 export type ActionState = {
