@@ -76,6 +76,7 @@ export type BrokerRequirement = PublicRequirementPreview & {
   buyerType: string | null;
   urgency: string | null;
   notes: string | null;
+  ownActiveOptionCount: number;
   expiresAt: string;
 };
 
@@ -89,6 +90,76 @@ export type OwnerRequirement = BrokerRequirement & {
   createdAt: string;
   closedAt: string | null;
   renewalCount: number;
+};
+
+export type MatchStatus = "active" | "withdrawn";
+export type MatchSizeUnit = "sq yd" | "sq ft" | "acre";
+export type MatchFloor = "Ground" | "First" | "Second" | "Third" | "Top" | "Other";
+export type MatchSource = "Direct" | "Through another broker" | "Prefer not to say";
+
+export type MatchOption = {
+  id: string;
+  localityId: string;
+  localityName: string;
+  askingPrice: number;
+  size: number | null;
+  sizeUnit: MatchSizeUnit | null;
+  floor: MatchFloor | null;
+  source: MatchSource | null;
+  notes: string | null;
+  status: MatchStatus;
+  createdAt: string;
+  updatedAt: string;
+  withdrawnAt: string | null;
+};
+
+export type OwnResponse = {
+  requirementId: string;
+  requirementOwnerId: string;
+  requirementLocalityNames: string[];
+  propertyTypeKey: PropertyTypeKey;
+  propertyType: string;
+  budgetMin: number;
+  budgetMax: number;
+  budgetLabel: string;
+  effectiveStatus: EffectiveRequirementStatus;
+  expiresAt: string;
+  responseId: string;
+  activeOptionCount: number;
+  withdrawnOptionCount: number;
+  options: MatchOption[];
+};
+
+export type RespondedRequirement = {
+  requirementId: string;
+  localityNames: string[];
+  propertyTypeKey: PropertyTypeKey;
+  propertyType: string;
+  budgetMin: number;
+  budgetMax: number;
+  budgetLabel: string;
+  effectiveStatus: EffectiveRequirementStatus;
+  activeOptionCount: number;
+  withdrawnOptionCount: number;
+  responseUpdatedAt: string;
+};
+
+export type OwnerResponseGroup = {
+  responseId: string;
+  respondentId: string;
+  respondentName: string;
+  respondentBrokerage: string | null;
+  options: MatchOption[];
+};
+
+export type OwnerMatchInbox = {
+  requirementId: string;
+  requirementLocalityNames: string[];
+  budgetMin: number;
+  budgetMax: number;
+  budgetLabel: string;
+  effectiveStatus: EffectiveRequirementStatus;
+  responses: OwnerResponseGroup[];
 };
 
 export type ActionState = {

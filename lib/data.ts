@@ -2,10 +2,26 @@ import { serializeBrokerRequirement, type BrokerRequirementRow } from "./broker-
 import { developmentLocalities, developmentPreviews } from "./dev-fixtures";
 import { previewMatchesFilters, type FeedFilters } from "./feed-filters";
 import { serializeOwnerRequirement, type OwnerRequirementRow } from "./owner-requirement";
+import {
+  serializeOwnResponse,
+  serializeOwnerInbox,
+  serializeRespondedRequirement,
+  type OwnResponseRow,
+  type OwnerResponseRow,
+  type RespondedRequirementRow,
+} from "./match-response";
 import { serializePublicPreview, type SafeRequirementRow } from "./public-preview";
 import { createPublicClient } from "./supabase/public";
 import { createClient } from "./supabase/server";
-import type { BrokerRequirement, LocalityOption, OwnerRequirement, PublicRequirementPreview } from "./types";
+import type {
+  BrokerRequirement,
+  LocalityOption,
+  OwnResponse,
+  OwnerMatchInbox,
+  OwnerRequirement,
+  PublicRequirementPreview,
+  RespondedRequirement,
+} from "./types";
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
@@ -119,4 +135,34 @@ export async function getOwnRequirement(id: string): Promise<OwnerRequirement | 
   if (error) throw new Error("Unable to load your requirement");
   const row = (data?.[0] as OwnerRequirementRow | undefined) ?? null;
   return row ? serializeOwnerRequirement(row) : null;
+}
+
+export async function getOwnResponse(requirementId: string): Promise<OwnResponse | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc("get_own_response", {
+    p_requirement_id: requirementId,
+  });
+  if (error) throw new Error("Unable to load your response");
+  return serializeOwnResponse((data ?? []) as OwnResponseRow[]);
+}
+
+export async function getRespondedRequirements(): Promise<RespondedRequirement[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase.rpc("get_responded_requirements");
+  if (error) throw new Error("Unable to load responded requirements");
+  return ((data ?? []) as RespondedRequirementRow[]).map(serializeRespondedRequirement);
+}
+
+export async function getRequirementResponsesForOwner(
+  requirementId: string,
+): Promise<OwnerMatchInbox | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc("get_requirement_responses_for_owner", {
+    p_requirement_id: requirementId,
+  });
+  if (error) throw new Error("Unable to load requirement responses");
+  return serializeOwnerInbox((data ?? []) as OwnerResponseRow[]);
 }

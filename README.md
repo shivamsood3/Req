@@ -1,12 +1,12 @@
-# REQ V0 — Build 3
+# REQ V0 — Build 4
 
-REQ is a private, mobile-first live requirement exchange for property brokers. Build 3 adds owner lifecycle management to secure publication and discovery while preserving the product constitution:
+REQ is a private, mobile-first live requirement exchange for property brokers. Build 4 adds structured, requirement-specific broker matching while preserving the product constitution:
 
 **POST → MATCH → CONNECT**
 
 REQ is not a property portal, CRM, social network, permanent inventory database, or AI product.
 
-## Build 3 scope
+## Build 4 scope
 
 Included:
 
@@ -30,12 +30,17 @@ Included:
 - `Keep Live` during the final 24 hours and `Make Live Again` for expired or closed requirements
 - Updated freshness that distinguishes material edits from original publication freshness
 - Owner history detail access without exposing another broker's closed or expired requirements
-- Disabled final-position placeholders for `I HAVE A MATCH` and `VIEW MATCHES`
-- Database security regression tests for discovery, publication, and lifecycle ownership
+- Approved brokers can submit up to three structured options to another broker's effectively live REQ
+- One broker response container per broker and requirement, with individually editable/withdrawable options
+- Responding-broker response management and a functional My REQs Responded tab
+- Owner-only, broker-grouped match inbox for live and historical REQs
+- Derived response counts that count brokers with active options, never the number of options
+- Disabled final-position `CONNECT` controls without contact sharing
+- Database security regression tests for discovery, publication, lifecycle ownership, and match privacy
 
 Explicitly out of scope:
 
-- Submitting matches, broker responses, or Connect
+- Connect and contact sharing
 - Phone/email exposure, notifications, push, SMS, WhatsApp, or external email systems
 - Search, analytics, reporting, account deletion, chat, CRM, inventory, social features, payments, images, or AI
 
@@ -78,6 +83,7 @@ Apply in order:
 4. `20260811235507_build1_live_discovery.sql`
 5. `202608120001_build2_create_requirement.sql`
 6. `202608120002_build3_requirement_lifecycle.sql`
+7. `202608120003_build4_broker_responses.sql`
 
 The Build 0 seed creates South Delhi localities and four development/demo requirements. The Build 1 migration explicitly deletes those four known requirement IDs so they are never represented as genuine production activity.
 
@@ -117,6 +123,17 @@ Only an approved requirement owner may execute the Build 3 lifecycle functions:
 - `renew_own_requirement` allows `Keep Live` only during the final 24 hours, or makes an expired/closed requirement live for a fresh seven-day window. Renewal explicitly changes `live_since`; ordinary editing never does.
 
 All functions derive ownership from `auth.uid()`, reject anonymous and non-approved profiles, and expose no broker contact information.
+
+## Match boundary
+
+Build 4 stores options only beneath a requirement-specific `broker_responses` container. It creates no property, listing, or permanent inventory records.
+
+- `submit_match` creates or reuses the caller's single response container and atomically enforces the three-active-option limit.
+- `update_own_match` and `withdraw_own_match` require an approved caller, option ownership, active option status, and an effectively live requirement.
+- `get_own_response` and `get_responded_requirements` expose only the caller's response history.
+- `get_requirement_responses_for_owner` exposes active options only to the requirement owner, grouped by responding broker, with name and brokerage but no phone or email.
+
+The public, broker, and owner requirement queries derive `response_count` from response containers that have at least one active option. Additional options from the same broker do not increase the total; withdrawing the final active option removes that broker from the total automatically. The legacy stored counter is not authoritative.
 
 ## Filtering
 
@@ -159,13 +176,14 @@ where email = 'admin@example.com';
 
 ## Tests and checks
 
-- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, lifecycle grouping, ownership, and boundary checks
+- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, lifecycle ownership, structured match validation, and Build boundaries
 - `npm run lint` — source linting
 - `npm run build` — production compilation
 - `npm audit` — dependency audit
 - `supabase/tests/build1_security.sql` — transactional database/RLS test suite; run in the Supabase SQL editor after the Build 1 migration
 - `supabase/tests/build2_security.sql` — transactional creation/RLS test suite; run after the Build 2 migration
 - `supabase/tests/build3_security.sql` — transactional owner lifecycle/RLS test suite; run after the Build 3 migration
+- `supabase/tests/build4_security.sql` — transactional response grouping, ownership, lifecycle, privacy, count, edit, and withdrawal suite
 
 The SQL suite rolls back all test users and requirements.
 
@@ -175,4 +193,4 @@ The production project is `shivamsood3s-projects/req`. Add the three environment
 
 ## Build boundary
 
-This repository intentionally stops after Build 3 lifecycle management. `My REQs` is functional for posted requirements, while its Responded tab remains a truthful empty state. `I HAVE A MATCH` and `VIEW MATCHES` remain non-functional placeholders. No Build 4+ matching, Connect, or later product behavior is implemented.
+This repository intentionally stops after Build 4 matching. Submit Match, response management, the Responded tab, and owner match inbox are functional. `CONNECT` remains disabled and no contact details are shared. No Build 5+ Connect, notifications, or later product behavior is implemented.

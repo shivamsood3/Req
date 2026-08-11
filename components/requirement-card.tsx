@@ -67,10 +67,20 @@ export function RequirementCard({
       </div>
 
       {brokerItem ? (
-        <button className="future-action" type="button" disabled>
-          {isOwn ? "View matches" : "I have a match"}
-          <span>Available in a future build</span>
-        </button>
+        <Link
+          className="feed-primary-action"
+          href={isOwn
+            ? `/requirements/${item.id}/matches`
+            : brokerItem.ownActiveOptionCount > 0
+              ? `/requirements/${item.id}/my-response`
+              : `/requirements/${item.id}/match`}
+        >
+          {isOwn
+            ? "View matches"
+            : brokerItem.ownActiveOptionCount > 0
+              ? `${brokerItem.ownActiveOptionCount} ${brokerItem.ownActiveOptionCount === 1 ? "option" : "options"} sent · View response`
+              : "I have a match"}
+        </Link>
       ) : null}
     </article>
   );

@@ -31,6 +31,7 @@ function item(
     buyerType: "End User",
     urgency: "Active",
     notes: null,
+    ownActiveOptionCount: 0,
     responseCount: 0,
     liveSince: new Date(now - 2 * 86_400_000).toISOString(),
     updatedAt: new Date(now - 2 * 86_400_000).toISOString(),

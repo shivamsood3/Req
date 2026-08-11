@@ -115,18 +115,14 @@ export default async function RequirementDetailPage({
               status={ownerItem.effectiveStatus}
               expiring={expiring}
             />
-            {effectiveStatus === "live" ? (
-              <button className="detail-future-action" type="button" disabled>
-                View matches
-                <span>Available in a future build</span>
-              </button>
-            ) : null}
+            {effectiveStatus !== "live" ? <Link className="detail-primary-action" href={`/requirements/${id}/matches`}>View matches</Link> : null}
           </div>
         ) : (
-          <button className="detail-future-action" type="button" disabled>
-            I have a match
-            <span>Available in a future build</span>
-          </button>
+          <Link className="detail-primary-action" href={requirement.ownActiveOptionCount > 0 ? `/requirements/${id}/my-response` : `/requirements/${id}/match`}>
+            {requirement.ownActiveOptionCount > 0
+              ? `View your response · ${requirement.ownActiveOptionCount} ${requirement.ownActiveOptionCount === 1 ? "option" : "options"} sent`
+              : "I have a match"}
+          </Link>
         )}
       </article>
     </AppShell>

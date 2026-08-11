@@ -41,6 +41,7 @@ export function OwnerLifecycleActions({
     <div className="owner-actions">
       {renewState.error ? <p className="field-error" role="alert">{renewState.error}</p> : null}
       {includeView ? <Link href={`/requirements/${requirementId}`}>View REQ</Link> : null}
+      <Link href={`/requirements/${requirementId}/matches`}>View matches</Link>
       <Link href={`/requirements/${requirementId}/edit`}>Edit</Link>
       {expiring ? (
         <form action={renewAction}>

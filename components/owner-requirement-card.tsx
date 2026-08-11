@@ -4,7 +4,7 @@ import {
   formatExpiry,
   formatHistoryTiming,
   formatLocalitySummary,
-  formatMatchCount,
+  formatResponseCount,
   formatRequirementActivity,
   isExpiring,
 } from "@/lib/requirement-format";
@@ -41,7 +41,7 @@ export function OwnerRequirementCard({
         <p className="owner-updated">{formatRequirementActivity(requirement.liveSince, requirement.updatedAt, generatedAt)}</p>
       ) : null}
       <div className="owner-card-meta">
-        <span>{formatMatchCount(requirement.responseCount)}</span>
+        <span>{formatResponseCount(requirement.responseCount)}</span>
         <span>{timing}</span>
       </div>
       {requirement.effectiveStatus === "live" ? (
@@ -54,6 +54,7 @@ export function OwnerRequirementCard({
       ) : (
         <div className="history-actions">
           <Link href={`/requirements/${requirement.id}`}>View REQ</Link>
+          <Link href={`/requirements/${requirement.id}/matches`}>View matches</Link>
           <OwnerLifecycleActions
             requirementId={requirement.id}
             status={requirement.effectiveStatus}

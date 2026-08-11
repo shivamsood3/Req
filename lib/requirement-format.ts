@@ -20,6 +20,14 @@ function compactNumber(value: number) {
   return Number.isInteger(value) ? value.toString() : value.toFixed(1).replace(/\.0$/, "");
 }
 
+export function formatAskingPrice(value: number) {
+  return `₹${compactNumber(value)} Cr`;
+}
+
+export function formatMatchSize(value: number | null, unit: string | null) {
+  return value !== null && unit ? `${compactNumber(value)} ${unit}` : null;
+}
+
 export function formatBudgetRange(min: number, max: number) {
   return `₹${compactNumber(min)}–${compactNumber(max)} Cr`;
 }
@@ -75,10 +83,6 @@ export function formatRequirementActivity(
 
 export function formatResponseCount(count: number) {
   return `${count} ${count === 1 ? "broker" : "brokers"} responded`;
-}
-
-export function formatMatchCount(count: number) {
-  return `${count} ${count === 1 ? "match" : "matches"}`;
 }
 
 export function formatExpiry(expiresAt: string, now = Date.now()) {

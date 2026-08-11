@@ -19,6 +19,7 @@ export type BrokerRequirementRow = {
   urgency: string | null;
   notes: string | null;
   response_count: number;
+  own_active_option_count?: number;
   live_since: string;
   updated_at: string;
   expires_at: string;
@@ -35,6 +36,7 @@ export function serializeBrokerRequirement(
     buyerType: row.buyer_type,
     urgency: row.urgency,
     notes: row.notes,
+    ownActiveOptionCount: row.own_active_option_count ?? 0,
     expiresAt: row.expires_at,
   };
 }
