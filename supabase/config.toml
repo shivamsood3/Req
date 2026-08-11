@@ -1,4 +1,4 @@
-project_id = "req-v0"
+project_id = "req"
 
 [auth]
 site_url = "http://localhost:3000"

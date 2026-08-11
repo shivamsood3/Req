@@ -36,8 +36,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .text-button { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 .feed-intro { padding: 35px 2px 22px; }
 .eyebrow { margin: 0 0 8px; color: var(--secondary); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
-.live-label { color: var(--green); display: flex; align-items: center; gap: 6px; }
 .feed-intro h1 { margin: 0; font-size: clamp(31px, 9vw, 42px); line-height: 1.04; letter-spacing: -.045em; }
+.feed-intro .market-heading { color: var(--green); }
 .feed-intro > p:last-child { margin: 8px 0 0; color: var(--secondary); font-size: 17px; }
 .filter-row { display: flex; gap: 8px; padding: 0 0 18px; overflow-x: auto; scrollbar-width: none; }
 .filter-chip { min-width: max-content; padding: 10px 13px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: #393936; font-size: 13px; font-weight: 650; opacity: 1; }

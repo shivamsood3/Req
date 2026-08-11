@@ -196,7 +196,7 @@ alter table public.requirement_localities enable row level security;
 
 create policy "profiles_select_own_or_admin" on public.profiles
 for select to authenticated
-using (id = auth.uid() or public.is_admin(auth.uid()));
+using (id = (select auth.uid()) or public.is_admin((select auth.uid())));
 
 create policy "localities_public_read" on public.localities
 for select to anon, authenticated
@@ -204,28 +204,58 @@ using (is_active = true);
 
 create policy "requirements_approved_read" on public.requirements
 for select to authenticated
-using (public.is_approved_user(auth.uid()));
+using (public.is_approved_user((select auth.uid())));
+
+create policy "requirements_public_preview_read" on public.requirements
+for select to anon
+using (
+  status = 'live'
+  and (expires_at is null or expires_at > now())
+);
 
 create policy "requirement_localities_approved_read" on public.requirement_localities
 for select to authenticated
-using (public.is_approved_user(auth.uid()));
+using (public.is_approved_user((select auth.uid())));
+
+create policy "requirement_localities_public_preview_read" on public.requirement_localities
+for select to anon
+using (
+  exists (
+    select 1
+    from public.requirements r
+    where r.id = requirement_id
+      and r.status = 'live'
+      and (r.expires_at is null or r.expires_at > now())
+  )
+);
 
 revoke all on public.profiles from anon, authenticated;
 grant select on public.profiles to authenticated;
 revoke all on public.localities from anon, authenticated;
 grant select on public.localities to anon, authenticated;
 revoke all on public.requirements from anon, authenticated;
+grant select (
+  id, property_type, budget_min, budget_max, size_min, size_max, size_unit,
+  floor_preference, status, response_count, live_since, expires_at
+) on public.requirements to anon;
 grant select on public.requirements to authenticated;
 revoke all on public.requirement_localities from anon, authenticated;
+grant select on public.requirement_localities to anon;
 grant select on public.requirement_localities to authenticated;
 
-revoke all on function public.complete_broker_profile(text, text, text, text, text) from public;
+revoke all on function public.set_updated_at() from public, anon, authenticated;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.is_approved_user(uuid) from public, anon, authenticated;
+grant execute on function public.is_approved_user(uuid) to authenticated;
+revoke all on function public.is_admin(uuid) from public, anon, authenticated;
+grant execute on function public.is_admin(uuid) to authenticated;
+revoke all on function public.complete_broker_profile(text, text, text, text, text) from public, anon, authenticated;
 grant execute on function public.complete_broker_profile(text, text, text, text, text) to authenticated;
-revoke all on function public.review_broker(uuid, text) from public;
+revoke all on function public.review_broker(uuid, text) from public, anon, authenticated;
 grant execute on function public.review_broker(uuid, text) to authenticated;
 
 create view public.public_requirement_previews
-with (security_barrier = true, security_invoker = false)
+with (security_barrier = true, security_invoker = true)
 as
 select
   r.id,

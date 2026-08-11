@@ -60,7 +60,7 @@ The public preview uses safe local fixtures when Supabase variables are absent, 
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/publishable key; RLS remains authoritative |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase publishable key; RLS remains authoritative |
 | `NEXT_PUBLIC_SITE_URL` | Yes in production | Canonical app URL, e.g. `https://req.example.com` |
 
 No service-role key is used by the application. Admin actions run as authenticated users through a guarded Postgres function.
@@ -71,6 +71,7 @@ Create a Supabase project, then apply in order:
 
 1. `supabase/migrations/202608110001_build0_schema.sql`
 2. `supabase/migrations/202608110002_build0_seed.sql`
+3. `supabase/migrations/20260811180619_harden_function_execute_privileges.sql`
 
 Using the Supabase CLI, link the project and run `supabase db push`. Alternatively, paste each migration into the SQL editor in order.
 

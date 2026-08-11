@@ -10,7 +10,7 @@ export default async function BrokerHomePage() {
   return (
     <AppShell profile={profile}>
       <p className="app-kicker">Good to see you, {profile.full_name?.split(" ")[0]}</p>
-      <h1 className="app-title">Live Requirements</h1>
+      <h1 className="app-title">Live Market</h1>
       <div className="status-strip"><span className="live-dot" /> Your broker access is live</div>
       <section className="app-preview-card">
         <h2>REQ is ready for the next build</h2>

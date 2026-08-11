@@ -37,8 +37,7 @@ export function PublicFeed({ items }: { items: PublicRequirementPreview[] }) {
       </header>
 
       <section className="feed-intro">
-        <p className="eyebrow live-label"><span className="live-dot" /> Live market</p>
-        <h1>Live Requirements</h1>
+        <h1 className="market-heading">Live Market</h1>
         <p>South Delhi</p>
       </section>
 

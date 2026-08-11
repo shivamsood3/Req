@@ -25,16 +25,14 @@ export const metadata: Metadata = {
     apple: "/icon-192.png",
   },
   openGraph: {
-    title: "REQ — Live Requirements",
+    title: "REQ — Live Market",
     description: "The private live requirement exchange for property brokers.",
     type: "website",
-    images: [{ url: "/og.png", width: 1536, height: 1024, alt: "REQ live requirements" }],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "REQ — Live Requirements",
+    card: "summary",
+    title: "REQ — Live Market",
     description: "The private live requirement exchange for property brokers.",
-    images: ["/og.png"],
   },
 };
 
