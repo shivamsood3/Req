@@ -1,0 +1,36 @@
+{
+  "name": "req-v0",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "lint": "eslint . --ignore-pattern .next"
+  },
+  "dependencies": {
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "next": "latest",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@next/eslint-plugin-next": "latest",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "9.39.4",
+    "eslint-config-next": "latest",
+    "tailwindcss": "4.2.1",
+    "typescript": "latest",
+    "typescript-eslint": "latest"
+  }
+}
