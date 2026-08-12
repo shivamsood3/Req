@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { MatchOptionActions } from "@/components/match-option-actions";
 import { requireApprovedBroker } from "@/lib/auth";
+import {
+  formatIndianMobile,
+  respondentToOwnerMessage,
+  whatsappUrl,
+} from "@/lib/connection";
 import { getOwnResponse } from "@/lib/data";
 import { formatAskingPrice, formatMatchSize } from "@/lib/requirement-format";
 
@@ -27,6 +32,15 @@ export default async function MyResponsePage({
   const canChange = response.effectiveStatus === "live";
   const activeOptions = response.options.filter((option) => option.status === "active");
   const withdrawnOptions = response.options.filter((option) => option.status === "withdrawn");
+  const ownerMobileLabel = formatIndianMobile(response.requirementOwnerMobile);
+  const ownerWhatsAppUrl = whatsappUrl(
+    response.requirementOwnerMobile,
+    respondentToOwnerMessage({
+      ownerName: response.requirementOwnerName,
+      localities: response.requirementLocalityNames,
+      budgetLabel: response.budgetLabel,
+    }),
+  );
 
   return (
     <AppShell profile={profile} activeNav="my-reqs">
@@ -42,6 +56,32 @@ export default async function MyResponsePage({
           <span>For</span>
           <strong>{response.requirementLocalityNames.join(" + ")} · {response.budgetLabel}</strong>
         </div>
+        {response.connectionId ? (
+          <div className="connected-contact response-connected-contact">
+            <p className="connected-status">✓ Connected</p>
+            {response.requirementOwnerName ? <h2>{response.requirementOwnerName}</h2> : null}
+            {response.requirementOwnerBrokerage ? <p>{response.requirementOwnerBrokerage}</p> : null}
+            {ownerMobileLabel ? (
+              <strong>{ownerMobileLabel}</strong>
+            ) : (
+              <p>Mobile number unavailable. Ask this broker to update their REQ profile.</p>
+            )}
+            {ownerWhatsAppUrl ? (
+              <a
+                className="detail-primary-action"
+                href={ownerWhatsAppUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open WhatsApp
+              </a>
+            ) : (
+              <p className="field-error">Mobile number unavailable. Ask this broker to update their REQ profile.</p>
+            )}
+          </div>
+        ) : (
+          <p className="response-locked">Waiting for REQ owner to connect.</p>
+        )}
         {response.effectiveStatus !== "live" ? (
           <p className="response-locked">This REQ is {response.effectiveStatus}. Existing matches remain visible, but they can no longer be changed.</p>
         ) : null}

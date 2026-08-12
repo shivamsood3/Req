@@ -116,6 +116,11 @@ export type MatchOption = {
 export type OwnResponse = {
   requirementId: string;
   requirementOwnerId: string;
+  requirementOwnerName: string | null;
+  requirementOwnerBrokerage: string | null;
+  requirementOwnerMobile: string | null;
+  connectionId: string | null;
+  connectedAt: string | null;
   requirementLocalityNames: string[];
   propertyTypeKey: PropertyTypeKey;
   propertyType: string;
@@ -142,6 +147,8 @@ export type RespondedRequirement = {
   activeOptionCount: number;
   withdrawnOptionCount: number;
   responseUpdatedAt: string;
+  connectionId: string | null;
+  connectedAt: string | null;
 };
 
 export type OwnerResponseGroup = {
@@ -149,6 +156,9 @@ export type OwnerResponseGroup = {
   respondentId: string;
   respondentName: string;
   respondentBrokerage: string | null;
+  respondentMobile: string | null;
+  connectionId: string | null;
+  connectedAt: string | null;
   options: MatchOption[];
 };
 

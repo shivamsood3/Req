@@ -16,6 +16,7 @@ export function RespondedRequirementCard({ requirement }: { requirement: Respond
         <span>Your response</span>
         <span>{requirement.activeOptionCount} active {requirement.activeOptionCount === 1 ? "option" : "options"}</span>
       </div>
+      {requirement.connectionId ? <p className="connected-status responded-connected">✓ Connected</p> : null}
       {requirement.withdrawnOptionCount > 0 ? <p className="withdrawn-note">{requirement.withdrawnOptionCount} withdrawn</p> : null}
       <Link className="owner-primary-action" href={`/requirements/${requirement.requirementId}/my-response`}>View response</Link>
     </article>

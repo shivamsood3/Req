@@ -16,6 +16,11 @@ import type {
 export type OwnResponseRow = {
   requirement_id: string;
   requirement_owner_id: string;
+  requirement_owner_name: string | null;
+  requirement_owner_brokerage: string | null;
+  requirement_owner_mobile: string | null;
+  connection_id: string | null;
+  connected_at: string | null;
   requirement_locality_names: string[];
   property_type_key: PropertyTypeKey;
   budget_min: number | string;
@@ -50,6 +55,8 @@ export type RespondedRequirementRow = {
   active_option_count: number;
   withdrawn_option_count: number;
   response_updated_at: string;
+  connection_id: string | null;
+  connected_at: string | null;
 };
 
 export type OwnerResponseRow = {
@@ -62,16 +69,19 @@ export type OwnerResponseRow = {
   respondent_id: string;
   respondent_name: string;
   respondent_brokerage: string | null;
+  respondent_mobile: string | null;
+  connection_id: string | null;
+  connected_at: string | null;
   option_count: number;
-  match_id: string;
-  match_locality_name: string;
-  asking_price: number | string;
+  match_id: string | null;
+  match_locality_name: string | null;
+  asking_price: number | string | null;
   match_size: number | string | null;
   match_size_unit: MatchSizeUnit | null;
   match_floor: MatchFloor | null;
   match_source: MatchSource | null;
   match_notes: string | null;
-  match_created_at: string;
+  match_created_at: string | null;
 };
 
 function optionFromOwnRow(row: OwnResponseRow): MatchOption {
@@ -100,6 +110,11 @@ export function serializeOwnResponse(rows: OwnResponseRow[]): OwnResponse | null
   return {
     requirementId: first.requirement_id,
     requirementOwnerId: first.requirement_owner_id,
+    requirementOwnerName: first.requirement_owner_name,
+    requirementOwnerBrokerage: first.requirement_owner_brokerage,
+    requirementOwnerMobile: first.requirement_owner_mobile,
+    connectionId: first.connection_id,
+    connectedAt: first.connected_at,
     requirementLocalityNames: first.requirement_locality_names,
     propertyTypeKey: first.property_type_key,
     propertyType: propertyTypeLabel(first.property_type_key),
@@ -130,6 +145,8 @@ export function serializeRespondedRequirement(row: RespondedRequirementRow): Res
     activeOptionCount: row.active_option_count,
     withdrawnOptionCount: row.withdrawn_option_count,
     responseUpdatedAt: row.response_updated_at,
+    connectionId: row.connection_id,
+    connectedAt: row.connected_at,
   };
 }
 
@@ -143,23 +160,28 @@ export function serializeOwnerInbox(rows: OwnerResponseRow[]): OwnerMatchInbox |
       respondentId: row.respondent_id,
       respondentName: row.respondent_name,
       respondentBrokerage: row.respondent_brokerage,
+      respondentMobile: row.respondent_mobile,
+      connectionId: row.connection_id,
+      connectedAt: row.connected_at,
       options: [],
     };
-    group.options.push({
-      id: row.match_id,
-      localityId: "",
-      localityName: row.match_locality_name,
-      askingPrice: Number(row.asking_price),
-      size: row.match_size === null ? null : Number(row.match_size),
-      sizeUnit: row.match_size_unit,
-      floor: row.match_floor,
-      source: row.match_source,
-      notes: row.match_notes,
-      status: "active",
-      createdAt: row.match_created_at,
-      updatedAt: row.match_created_at,
-      withdrawnAt: null,
-    });
+    if (row.match_id && row.match_locality_name && row.asking_price !== null && row.match_created_at) {
+      group.options.push({
+        id: row.match_id,
+        localityId: "",
+        localityName: row.match_locality_name,
+        askingPrice: Number(row.asking_price),
+        size: row.match_size === null ? null : Number(row.match_size),
+        sizeUnit: row.match_size_unit,
+        floor: row.match_floor,
+        source: row.match_source,
+        notes: row.match_notes,
+        status: "active",
+        createdAt: row.match_created_at,
+        updatedAt: row.match_created_at,
+        withdrawnAt: null,
+      });
+    }
     groups.set(row.response_id, group);
   }
   const budgetMin = Number(first.budget_min);

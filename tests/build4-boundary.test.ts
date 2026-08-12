@@ -53,11 +53,9 @@ test("every Build 4 server action independently authorizes", async () => {
   assert.doesNotMatch(sources.join("\n"), /p_broker_id|mobile|email|whatsapp/i);
 });
 
-test("owner inbox keeps Connect disabled and Responded tab uses real data", async () => {
+test("owner inbox and Responded tab use real response data without fixtures", async () => {
   const [inbox, myReqs] = await Promise.all([readFile(inboxPagePath, "utf8"), readFile(myReqsPath, "utf8")]);
   assert.match(inbox, /Connect/);
-  assert.match(inbox, /disabled/);
-  assert.doesNotMatch(inbox, /phone|mobile|email|whatsapp/i);
   assert.match(myReqs, /getRespondedRequirements/);
   assert.doesNotMatch(myReqs, /Once matching is enabled|mockResponses|fixtureResponses/);
 });

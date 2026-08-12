@@ -301,6 +301,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .owner-option-list { display: grid; }
 .owner-match-option { padding: 16px 0; border-bottom: 1px solid var(--border); }
 .owner-match-option:last-child { border-bottom: 0; }
+.connected-contact { margin-top: 15px; padding: 14px; border: 1px solid #d9ebdd; border-radius: 11px; background: var(--green-soft); }
+.connected-contact h2, .connected-contact h3 { margin: 4px 0 4px; font-size: 16px; letter-spacing: -.02em; }
+.connected-contact p { margin: 0; color: var(--secondary); font-size: 12px; line-height: 1.45; }
+.connected-contact strong { margin-top: 8px; display: block; color: var(--text); font-size: 14px; }
+.connected-status { margin: 0; color: var(--green); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.response-connected-contact .detail-primary-action { margin-top: 14px; }
+.responded-connected { margin-top: 13px; }
 
 .admin-shell { min-height: 100svh; }
 .admin-header { height: 68px; padding: 0 max(20px, calc((100vw - 1060px)/2)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }

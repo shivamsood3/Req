@@ -1,12 +1,12 @@
-# REQ V0 — Build 4
+# REQ V0 — Build 5
 
-REQ is a private, mobile-first live requirement exchange for property brokers. Build 4 adds structured, requirement-specific broker matching while preserving the product constitution:
+REQ is a private, mobile-first live requirement exchange for property brokers. Build 5 completes the V0 loop by allowing deliberate owner-initiated contact exchange after a broker submits an active match:
 
 **POST → MATCH → CONNECT**
 
 REQ is not a property portal, CRM, social network, permanent inventory database, or AI product.
 
-## Build 4 scope
+## Build 5 scope
 
 Included:
 
@@ -35,13 +35,18 @@ Included:
 - Responding-broker response management and a functional My REQs Responded tab
 - Owner-only, broker-grouped match inbox for live and historical REQs
 - Derived response counts that count brokers with active options, never the number of options
-- Disabled final-position `CONNECT` controls without contact sharing
-- Database security regression tests for discovery, publication, lifecycle ownership, and match privacy
+- Owner-initiated `CONNECT` from a live REQ match inbox
+- One connection maximum per requirement and responding broker
+- Connection-scoped mobile sharing for the REQ owner and connected responding broker
+- Standard `wa.me` WhatsApp handoff with short contextual messages
+- Connected state in owner match inbox, respondent response history, and My REQs Responded
+- Historical connection visibility after a REQ closes/expires or options are withdrawn
+- Database security regression tests for discovery, publication, lifecycle ownership, match privacy, and connection contact privacy
 
 Explicitly out of scope:
 
-- Connect and contact sharing
-- Phone/email exposure, notifications, push, SMS, WhatsApp, or external email systems
+- Internal chat, WhatsApp Business API, automated messages, SMS, email notifications, push, or in-app notifications
+- Email exposure
 - Search, analytics, reporting, account deletion, chat, CRM, inventory, social features, payments, images, or AI
 
 ## Stack
@@ -84,6 +89,7 @@ Apply in order:
 5. `202608120001_build2_create_requirement.sql`
 6. `202608120002_build3_requirement_lifecycle.sql`
 7. `202608120003_build4_broker_responses.sql`
+8. `202608120004_build5_connections.sql`
 
 The Build 0 seed creates South Delhi localities and four development/demo requirements. The Build 1 migration explicitly deletes those four known requirement IDs so they are never represented as genuine production activity.
 
@@ -134,6 +140,19 @@ Build 4 stores options only beneath a requirement-specific `broker_responses` co
 - `get_requirement_responses_for_owner` exposes active options only to the requirement owner, grouped by responding broker, with name and brokerage but no phone or email.
 
 The public, broker, and owner requirement queries derive `response_count` from response containers that have at least one active option. Additional options from the same broker do not increase the total; withdrawing the final active option removes that broker from the total automatically. The legacy stored counter is not authoritative.
+
+## Connect boundary
+
+Build 5 creates one `connections` row per requirement and responding broker. The row stores only relationship IDs and `created_at`; phone numbers remain sourced from `profiles`.
+
+- Only the live REQ owner may execute `connect_to_response`.
+- The database derives `request_owner_id` from requirement ownership and rejects non-owners.
+- New connections require an effectively live requirement and at least one active match option from an approved responding broker.
+- Duplicate Connect attempts return/preserve the existing connection.
+- Existing connections remain visible after the REQ later closes/expires or match options are withdrawn.
+- Contact data is exposed only inside scoped owner/respondent read functions and only after a connection exists.
+- Connected parties see registered mobile numbers, never email addresses.
+- WhatsApp handoff is a normal `wa.me` deep link generated after contact is visible; REQ does not send messages automatically and does not integrate any WhatsApp API.
 
 ## Filtering
 
@@ -194,6 +213,7 @@ where email = 'admin@example.com';
 - `supabase/tests/build2_security.sql` — transactional creation/RLS test suite; run after the Build 2 migration
 - `supabase/tests/build3_security.sql` — transactional owner lifecycle/RLS test suite; run after the Build 3 migration
 - `supabase/tests/build4_security.sql` — transactional response grouping, ownership, lifecycle, privacy, count, edit, and withdrawal suite
+- `supabase/tests/build5_security.sql` — transactional Connect/contact privacy, lifecycle, idempotency, and history suite
 
 The SQL suite rolls back all test users and requirements.
 
@@ -203,4 +223,4 @@ The production project is `shivamsood3s-projects/req`. Add the three environment
 
 ## Build boundary
 
-This repository intentionally stops at the Build 4.1 auth UX correction. Submit Match, response management, the Responded tab, and owner match inbox are functional. Normal authentication is email and password. `CONNECT` remains disabled and no contact details are shared. No Build 5+ Connect, notifications, or later product behavior is implemented.
+This repository intentionally stops at Build 5 Connect. Submit Match, response management, the Responded tab, owner match inbox, and connection-scoped mobile sharing are functional. Normal authentication is email and password. No Build 6+ notifications or later product behavior is implemented.
