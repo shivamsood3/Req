@@ -1,11 +1,13 @@
 project_id = "req"
 
 [auth]
-site_url = "http://localhost:3000"
+site_url = "https://req-sand.vercel.app"
 additional_redirect_urls = [
+  "http://localhost:3000",
   "http://localhost:3000/auth/callback",
   "http://localhost:3000/auth/confirm",
   "http://localhost:3000/reset-password",
+  "https://req-sand.vercel.app",
   "https://req-sand.vercel.app/auth/callback",
   "https://req-sand.vercel.app/auth/confirm",
   "https://req-sand.vercel.app/reset-password",
@@ -13,5 +15,12 @@ additional_redirect_urls = [
 
 [auth.email]
 enable_signup = true
-double_confirm_changes = true
+double_confirm_changes = false
 enable_confirmations = false
+secure_password_change = false
+max_frequency = "1m0s"
+otp_length = 8
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
