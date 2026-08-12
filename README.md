@@ -185,17 +185,19 @@ In **Supabase → Authentication → Providers → Email**:
 
 - Enable email/password signups and password login.
 - Set the minimum password length to at least 8 characters.
-- For the private manually approved pilot, email confirmation can be disabled so new brokers can complete profile setup immediately. Manual admin approval remains the membership gate.
+- For the private manually approved pilot, turn **Confirm email** off. New brokers should not receive a verification email; `/request-access` now creates the password account and shows a pending approval screen.
 
-If email confirmation remains enabled, new brokers will see a confirmation message after signup and can continue after confirming their email. Password reset links should use `/reset-password` as the redirect. The app also supports Supabase token-hash email templates through `/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`.
+Manual admin approval remains the membership gate. If email confirmation remains enabled in the hosted Supabase project, Supabase may still send its confirmation email even though the app no longer asks users to verify. Password reset links should use `/reset-password` as the redirect. The app also supports Supabase token-hash email templates through `/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`.
+
+Approval emails are intentionally separate from Supabase signup confirmation. The current Build 5 app gives admins a basic approval UI at `/admin/brokers`; an automated “your REQ account is approved” email requires a service-role server/Edge Function email sender and is not wired into the client signup flow.
 
 Existing users created during the earlier magic-link flow keep the same `auth.users.id`, profile, REQs, responses, and matches. If they do not have a password yet, they should use **Forgot password?** once to set one.
 
 ## Create the first admin
 
 1. Use `/request-access` with the intended admin email.
-2. Create a password and complete the broker profile.
-3. In the Supabase SQL editor, run the following once, replacing the email:
+2. Create a password.
+3. In the Supabase SQL editor, run the latest admin bootstrap migration, or run the following once with the intended email:
 
 ```sql
 update public.profiles
@@ -205,7 +207,7 @@ set role = 'admin',
 where email = 'admin@example.com';
 ```
 
-4. Sign out and sign in again with email and password. Do not expose a browser-based “make admin” action.
+4. Sign out and sign in again with email and password. The basic browser admin panel is available at `/admin/brokers`.
 
 ## Tests and checks
 

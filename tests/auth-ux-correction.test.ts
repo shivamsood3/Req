@@ -7,6 +7,7 @@ const loginPagePath = new URL("../app/login/page.tsx", import.meta.url);
 const rootPagePath = new URL("../app/page.tsx", import.meta.url);
 const loginFormPath = new URL("../components/login-form.tsx", import.meta.url);
 const requestPagePath = new URL("../app/request-access/page.tsx", import.meta.url);
+const requestThanksPath = new URL("../app/request-access/thanks/page.tsx", import.meta.url);
 const requestFormPath = new URL("../components/request-access-form.tsx", import.meta.url);
 const forgotFormPath = new URL("../components/forgot-password-form.tsx", import.meta.url);
 const resetFormPath = new URL("../components/reset-password-form.tsx", import.meta.url);
@@ -34,14 +35,21 @@ test("login uses Supabase email and password, then keeps existing profile routin
   assert.doesNotMatch(`${page}\n${form}`, /signInWithOtp|Send magic link|No password required|Check your inbox/i);
 });
 
-test("request access creates a Supabase password user and continues to profile setup", async () => {
-  const [page, form] = await Promise.all([readFile(requestPagePath, "utf8"), readFile(requestFormPath, "utf8")]);
+test("request access creates a Supabase password user and shows pending approval instead of email verification", async () => {
+  const [page, form, thanks] = await Promise.all([
+    readFile(requestPagePath, "utf8"),
+    readFile(requestFormPath, "utf8"),
+    readFile(requestThanksPath, "utf8"),
+  ]);
   assert.match(form, /auth\.signUp/);
   assert.match(form, /validatePasswordPair/);
-  assert.match(form, /router\.replace\("\/profile-setup"\)/);
-  assert.match(form, /Confirm your email/);
+  assert.match(form, /auth\.signOut/);
+  assert.match(form, /router\.replace\("\/request-access\/thanks"\)/);
+  assert.match(form, /Create account/);
+  assert.match(thanks, /Request received/);
+  assert.match(thanks, /pending approval/);
   assert.match(page, /if \(user\) redirect\(resolvePostAuthRoute\(profile\)\)/);
-  assert.doesNotMatch(`${page}\n${form}`, /signInWithOtp|magic link|invite code|social login/i);
+  assert.doesNotMatch(`${page}\n${form}\n${thanks}`, /Confirm your email|signInWithOtp|magic link|invite code|social login/i);
 });
 
 test("password validation stays simple and mismatch is rejected", () => {

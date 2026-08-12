@@ -60,10 +60,14 @@ test("rejected and suspended users cannot access the broker app", () => {
   assert.equal(resolvePostAuthRoute(profile({ status: "suspended" })), "/access-suspended");
 });
 
-test("incomplete profiles are sent to profile setup", () => {
-  const incomplete = profile({ full_name: null });
+test("approved incomplete broker profiles are sent to profile setup", () => {
+  const incomplete = profile({ status: "approved", full_name: null });
   assert.equal(isProfileComplete(incomplete), false);
   assert.equal(resolvePostAuthRoute(incomplete), "/profile-setup");
+});
+
+test("pending users see the pending approval screen even before profile setup", () => {
+  assert.equal(resolvePostAuthRoute(profile({ status: "pending", full_name: null })), "/pending");
 });
 
 test("new profile creation defaults to broker pending status", () => {

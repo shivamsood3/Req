@@ -10,7 +10,7 @@ export function normalizeAuthError(message: string, fallback: string) {
   }
 
   if (lower.includes("email not confirmed") || lower.includes("not confirmed")) {
-    return "This email is not confirmed yet. Use Forgot password once, or ask an admin to confirm the account.";
+    return "This account is not ready yet. Please wait for your approval email, then sign in again.";
   }
 
   if (lower.includes("password") && lower.includes("at least")) {

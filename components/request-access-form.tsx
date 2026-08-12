@@ -10,13 +10,11 @@ import { PasswordField } from "./password-field";
 export function RequestAccessForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
-    setMessage("");
     setError("");
 
     const formData = new FormData(event.currentTarget);
@@ -41,9 +39,6 @@ export function RequestAccessForm() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
     });
 
     if (signUpError) {
@@ -52,13 +47,8 @@ export function RequestAccessForm() {
       return;
     }
 
-    if (!data.session) {
-      setMessage("Account created. Confirm your email, then sign in to complete your broker profile.");
-      setLoading(false);
-      return;
-    }
-
-    router.replace("/profile-setup");
+    if (data.session) await supabase.auth.signOut();
+    router.replace("/request-access/thanks");
     router.refresh();
   }
 
@@ -84,9 +74,8 @@ export function RequestAccessForm() {
         autoComplete="new-password"
       />
       {error ? <p className="form-error" role="alert">{error}</p> : null}
-      {message ? <p className="form-success" role="status">{message}</p> : null}
       <button className="primary-button" type="submit" disabled={loading}>
-        {loading ? "Creating account…" : "Continue"}
+        {loading ? "Creating account…" : "Create account"}
       </button>
       <p className="auth-footnote">
         Already a member? <Link href="/login">Sign in</Link>

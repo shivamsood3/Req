@@ -13,7 +13,7 @@ test("bootstrap migration approves shivam admin and confirms the auth email", as
   const sql = await readFile(migrationPath, "utf8");
   assert.match(sql, /lower\(email\) = 'shivam@theantialias\.com'/i);
   assert.match(sql, /email_confirmed_at = coalesce\(email_confirmed_at, now\(\)\)/i);
-  assert.match(sql, /confirmed_at = coalesce\(confirmed_at, now\(\)\)/i);
+  assert.doesNotMatch(sql, /\bconfirmed_at\s*=/i);
   assert.match(sql, /'admin'::public\.broker_role/i);
   assert.match(sql, /'approved'::public\.broker_status/i);
   assert.match(sql, /create or replace function public\.handle_new_user/i);
@@ -52,6 +52,6 @@ test("admin route no longer requires broker profile completion", async () => {
 test("email confirmation login failure is no longer a generic try-again error", () => {
   assert.equal(
     normalizeAuthError("Email not confirmed", "Couldn’t sign you in. Try again."),
-    "This email is not confirmed yet. Use Forgot password once, or ask an admin to confirm the account.",
+    "This account is not ready yet. Please wait for your approval email, then sign in again.",
   );
 });
