@@ -46,6 +46,13 @@ test("admin can access /admin", () => {
   assert.equal(resolvePostAuthRoute(profile({ status: "approved", role: "admin" })), "/admin");
 });
 
+test("approved admin can reach admin even before broker profile completion", () => {
+  assert.equal(
+    resolvePostAuthRoute(profile({ status: "approved", role: "admin", full_name: null })),
+    "/admin",
+  );
+});
+
 test("rejected and suspended users cannot access the broker app", () => {
   assert.equal(canAccessArea(profile({ status: "rejected" }), "broker"), false);
   assert.equal(canAccessArea(profile({ status: "suspended" }), "broker"), false);

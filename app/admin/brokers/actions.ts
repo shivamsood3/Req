@@ -8,7 +8,7 @@ export async function reviewBroker(formData: FormData) {
   await requireAdmin();
   const brokerId = String(formData.get("broker_id") ?? "");
   const decision = String(formData.get("decision") ?? "");
-  if (!/^[0-9a-f-]{36}$/i.test(brokerId) || !["approved", "rejected"].includes(decision)) {
+  if (!/^[0-9a-f-]{36}$/i.test(brokerId) || !["pending", "approved", "suspended", "rejected"].includes(decision)) {
     throw new Error("Invalid broker review request.");
   }
 

@@ -35,7 +35,7 @@ export async function requireApprovedBroker() {
 export async function requireAdmin() {
   const session = await getSessionProfile();
   if (!session.user) redirect("/login");
-  if (!session.profile || !isProfileComplete(session.profile)) {
+  if (!session.profile) {
     redirect("/profile-setup");
   }
   if (!canAccessArea(session.profile, "admin")) {

@@ -33,11 +33,12 @@ export function resolvePostAuthRoute(
         >)
     | null,
 ) {
-  if (!profile || !isProfileComplete(profile)) return "/profile-setup";
-  if (profile.status === "pending") return "/pending";
+  if (!profile) return "/profile-setup";
   if (profile.status === "approved") {
     return profile.role === "admin" ? "/admin" : "/home";
   }
+  if (!isProfileComplete(profile)) return "/profile-setup";
+  if (profile.status === "pending") return "/pending";
   return "/access-suspended";
 }
 

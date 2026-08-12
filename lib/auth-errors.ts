@@ -9,6 +9,10 @@ export function normalizeAuthError(message: string, fallback: string) {
     return "Email or password is incorrect.";
   }
 
+  if (lower.includes("email not confirmed") || lower.includes("not confirmed")) {
+    return "This email is not confirmed yet. Use Forgot password once, or ask an admin to confirm the account.";
+  }
+
   if (lower.includes("password") && lower.includes("at least")) {
     return "Password must be at least 8 characters.";
   }

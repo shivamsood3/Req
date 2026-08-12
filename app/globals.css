@@ -321,6 +321,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-placeholder { padding: 28px; border: 1px solid var(--border); border-radius: var(--radius); background: white; }
 .admin-placeholder h2 { margin: 0 0 7px; font-size: 19px; }
 .admin-placeholder p { margin: 0; color: var(--secondary); font-size: 14px; }
+.admin-status-grid { margin: 20px 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.admin-status-grid p { padding: 14px; border: 1px solid var(--border); border-radius: 11px; background: var(--bg); }
+.admin-status-grid strong { display: block; color: var(--text); font-size: 24px; letter-spacing: -.04em; }
+.admin-status-grid span { color: var(--secondary); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .broker-table { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: white; }
 .broker-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .broker-table th { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--secondary); text-align: left; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
@@ -328,9 +332,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .broker-table tr:last-child td { border-bottom: 0; }
 .broker-name { font-weight: 750; }
 .broker-sub { margin-top: 3px; color: var(--secondary); font-size: 11px; }
-.review-actions { display: flex; gap: 7px; }
+.status-pill { display: inline-flex; min-width: 82px; justify-content: center; padding: 7px 10px; border-radius: 999px; font-size: 10px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.status-approved { background: var(--green-soft); color: #147336; }
+.status-pending { background: #fff8e6; color: #8a5b00; }
+.status-suspended { background: #fff1f0; color: var(--danger); }
+.status-rejected { background: var(--bg); color: var(--secondary); }
+.review-actions { display: flex; flex-wrap: wrap; gap: 7px; min-width: 270px; }
 .review-actions button { padding: 8px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+.review-actions button:disabled { opacity: .42; cursor: default; }
 .approve-button { border: 0; background: var(--green); color: white; }
+.pending-button { border: 1px solid #f0cf81; background: #fff8e6; color: #8a5b00; }
+.suspend-button { border: 1px solid #f3b5ad; background: #fff1f0; color: var(--danger); }
 .reject-button { border: 1px solid var(--border); background: white; color: var(--danger); }
 .empty-state { padding: 50px 20px; color: var(--secondary); text-align: center; }
 
