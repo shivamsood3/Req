@@ -98,7 +98,9 @@ export function PublicFeed({
             </button>
             <p className="locality">{formatLocalitySummary(selected.localityNames)}</p>
             <h2 id="auth-sheet-title">{selected.budgetLabel}</h2>
-            <p className="sheet-copy">Sign in to view the full REQ.</p>
+            <p className="sheet-copy">
+              Sign in to view the full REQ and respond with matching inventory.
+            </p>
             <Link
               className="primary-button"
               href={`/request-access?next=/requirements/${selected.id}`}

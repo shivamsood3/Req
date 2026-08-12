@@ -150,18 +150,28 @@ Both `/` and `/home` accept validated query parameters:
 
 ## Authentication configuration
 
+REQ V0 uses Supabase Auth with email and password. It does not use Clerk, social login, SMS, or magic links for normal sign-in.
+
 In **Supabase → Authentication → URL Configuration**:
 
 - Local redirect: `http://localhost:3000/auth/callback`
 - Production Site URL: `https://req-sand.vercel.app`
 - Production redirect: `https://req-sand.vercel.app/auth/callback`
 
-Magic links use Supabase's built-in email delivery. No external email provider is part of REQ V0.
+In **Supabase → Authentication → Providers → Email**:
+
+- Enable email/password signups and password login.
+- Set the minimum password length to at least 8 characters.
+- For the private manually approved pilot, email confirmation can be disabled so new brokers can complete profile setup immediately. Manual admin approval remains the membership gate.
+
+If email confirmation remains enabled, new brokers will see a confirmation message after signup and can continue after confirming their email. Password reset links should use the same `/auth/callback` redirect; the app sends recovery users on to `/reset-password`.
+
+Existing users created during the earlier magic-link flow keep the same `auth.users.id`, profile, REQs, responses, and matches. If they do not have a password yet, they should use **Forgot password?** once to set one.
 
 ## Create the first admin
 
 1. Use `/request-access` with the intended admin email.
-2. Open the magic link and complete the broker profile.
+2. Create a password and complete the broker profile.
 3. In the Supabase SQL editor, run the following once, replacing the email:
 
 ```sql
@@ -172,11 +182,11 @@ set role = 'admin',
 where email = 'admin@example.com';
 ```
 
-4. Sign out and sign in again. Do not expose a browser-based “make admin” action.
+4. Sign out and sign in again with email and password. Do not expose a browser-based “make admin” action.
 
 ## Tests and checks
 
-- `npm test` — authorization, safe serializers, filters, freshness, multi-locality, creation validation, lifecycle ownership, structured match validation, and Build boundaries
+- `npm test` — authorization, auth UX correction, safe serializers, filters, freshness, multi-locality, creation validation, lifecycle ownership, structured match validation, and Build boundaries
 - `npm run lint` — source linting
 - `npm run build` — production compilation
 - `npm audit` — dependency audit
@@ -193,4 +203,4 @@ The production project is `shivamsood3s-projects/req`. Add the three environment
 
 ## Build boundary
 
-This repository intentionally stops after Build 4 matching. Submit Match, response management, the Responded tab, and owner match inbox are functional. `CONNECT` remains disabled and no contact details are shared. No Build 5+ Connect, notifications, or later product behavior is implemented.
+This repository intentionally stops at the Build 4.1 auth UX correction. Submit Match, response management, the Responded tab, and owner match inbox are functional. Normal authentication is email and password. `CONNECT` remains disabled and no contact details are shared. No Build 5+ Connect, notifications, or later product behavior is implemented.

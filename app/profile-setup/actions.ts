@@ -30,7 +30,7 @@ export async function completeProfile(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Your session expired. Request a new magic link." };
+  if (!user) return { error: "Your session expired. Sign in again to continue." };
 
   const { error } = await supabase.rpc("complete_broker_profile", {
     p_full_name: fullName,
