@@ -4,7 +4,11 @@ project_id = "req"
 site_url = "http://localhost:3000"
 additional_redirect_urls = [
   "http://localhost:3000/auth/callback",
+  "http://localhost:3000/auth/confirm",
+  "http://localhost:3000/reset-password",
   "https://req-sand.vercel.app/auth/callback",
+  "https://req-sand.vercel.app/auth/confirm",
+  "https://req-sand.vercel.app/reset-password",
 ]
 
 [auth.email]

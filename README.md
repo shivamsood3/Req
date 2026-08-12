@@ -174,8 +174,12 @@ REQ V0 uses Supabase Auth with email and password. It does not use Clerk, social
 In **Supabase → Authentication → URL Configuration**:
 
 - Local redirect: `http://localhost:3000/auth/callback`
+- Local reset redirect: `http://localhost:3000/reset-password`
+- Local token-hash confirm redirect: `http://localhost:3000/auth/confirm`
 - Production Site URL: `https://req-sand.vercel.app`
 - Production redirect: `https://req-sand.vercel.app/auth/callback`
+- Production reset redirect: `https://req-sand.vercel.app/reset-password`
+- Production token-hash confirm redirect: `https://req-sand.vercel.app/auth/confirm`
 
 In **Supabase → Authentication → Providers → Email**:
 
@@ -183,7 +187,7 @@ In **Supabase → Authentication → Providers → Email**:
 - Set the minimum password length to at least 8 characters.
 - For the private manually approved pilot, email confirmation can be disabled so new brokers can complete profile setup immediately. Manual admin approval remains the membership gate.
 
-If email confirmation remains enabled, new brokers will see a confirmation message after signup and can continue after confirming their email. Password reset links should use the same `/auth/callback` redirect; the app sends recovery users on to `/reset-password`.
+If email confirmation remains enabled, new brokers will see a confirmation message after signup and can continue after confirming their email. Password reset links should use `/reset-password` as the redirect. The app also supports Supabase token-hash email templates through `/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`.
 
 Existing users created during the earlier magic-link flow keep the same `auth.users.id`, profile, REQs, responses, and matches. If they do not have a password yet, they should use **Forgot password?** once to set one.
 

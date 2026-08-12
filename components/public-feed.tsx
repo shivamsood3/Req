@@ -9,16 +9,20 @@ import { Brand } from "./brand";
 import { FeedFilters } from "./feed-filters";
 import { RequirementCard } from "./requirement-card";
 
+type PublicFeedBasePath = "/" | "/home";
+
 export function PublicFeed({
   items,
   localities,
   filters,
   generatedAt,
+  basePath = "/",
 }: {
   items: PublicRequirementPreview[];
   localities: LocalityOption[];
   filters: FeedFilterState;
   generatedAt: number;
+  basePath?: PublicFeedBasePath;
 }) {
   const [selected, setSelected] = useState<PublicRequirementPreview | null>(null);
 
@@ -51,7 +55,7 @@ export function PublicFeed({
 
       <FeedFilters
         key={JSON.stringify(filters)}
-        basePath="/"
+        basePath={basePath}
         localities={localities}
         filters={filters}
       />

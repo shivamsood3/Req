@@ -9,9 +9,14 @@ const requestPagePath = new URL("../app/request-access/page.tsx", import.meta.ur
 const requestFormPath = new URL("../components/request-access-form.tsx", import.meta.url);
 const forgotFormPath = new URL("../components/forgot-password-form.tsx", import.meta.url);
 const resetFormPath = new URL("../components/reset-password-form.tsx", import.meta.url);
+const resetPagePath = new URL("../app/reset-password/page.tsx", import.meta.url);
 const callbackPath = new URL("../app/auth/callback/route.ts", import.meta.url);
+const confirmPath = new URL("../app/auth/confirm/route.ts", import.meta.url);
+const homePath = new URL("../app/home/page.tsx", import.meta.url);
 const profileActionPath = new URL("../app/profile-setup/actions.ts", import.meta.url);
 const publicFeedPath = new URL("../components/public-feed.tsx", import.meta.url);
+const publicFeedComponentPath = new URL("../components/public-feed.tsx", import.meta.url);
+const supabaseConfigPath = new URL("../supabase/config.toml", import.meta.url);
 const schemaPath = new URL("../supabase/migrations/202608110001_build0_schema.sql", import.meta.url);
 const createRequirementPath = new URL("../supabase/migrations/202608120001_build2_create_requirement.sql", import.meta.url);
 const build4Path = new URL("../supabase/migrations/202608120003_build4_broker_responses.sql", import.meta.url);
@@ -54,17 +59,44 @@ test("invalid credentials and duplicate signup are broker-safe messages", () => 
 });
 
 test("forgot and reset password use Supabase recovery only, not normal magic-link login", async () => {
-  const [forgot, reset, callback] = await Promise.all([
+  const [forgot, reset, resetPage, callback, confirm, config] = await Promise.all([
     readFile(forgotFormPath, "utf8"),
     readFile(resetFormPath, "utf8"),
+    readFile(resetPagePath, "utf8"),
     readFile(callbackPath, "utf8"),
+    readFile(confirmPath, "utf8"),
+    readFile(supabaseConfigPath, "utf8"),
   ]);
   assert.match(forgot, /resetPasswordForEmail/);
-  assert.match(forgot, /\/auth\/callback\?next=\/reset-password/);
+  assert.match(forgot, /\/reset-password/);
+  assert.match(reset, /exchangeCodeForSession/);
+  assert.match(reset, /verifyOtp/);
+  assert.match(reset, /setSession/);
   assert.match(reset, /auth\.updateUser\(\{ password \}\)/);
   assert.match(reset, /router\.replace\("\/login\?updated=password"\)/);
+  assert.match(resetPage, /<ResetPasswordForm \/>/);
   assert.match(callback, /safeNextPath/);
-  assert.doesNotMatch(`${forgot}\n${reset}\n${callback}`, /signInWithOtp|Send magic link/i);
+  assert.match(confirm, /token_hash/);
+  assert.match(confirm, /type/);
+  assert.match(confirm, /verifyOtp/);
+  assert.match(config, /https:\/\/req-sand\.vercel\.app\/reset-password/);
+  assert.match(config, /https:\/\/req-sand\.vercel\.app\/auth\/confirm/);
+  assert.doesNotMatch(`${forgot}\n${reset}\n${callback}\n${confirm}`, /signInWithOtp|Send magic link/i);
+});
+
+test("home shows the public live market before login and broker feed after approval", async () => {
+  const [home, publicFeed] = await Promise.all([
+    readFile(homePath, "utf8"),
+    readFile(publicFeedComponentPath, "utf8"),
+  ]);
+  assert.match(home, /getSessionProfile/);
+  assert.match(home, /if \(!user\)/);
+  assert.match(home, /getPublicPreviews\(filters\)/);
+  assert.match(home, /<PublicFeed/);
+  assert.match(home, /basePath="\/home"/);
+  assert.match(home, /getBrokerLiveRequirements\(filters\)/);
+  assert.match(publicFeed, /basePath = "\/"/);
+  assert.doesNotMatch(home, /requireApprovedBroker/);
 });
 
 test("existing auth user IDs, ownership, and match responses remain based on auth.uid", async () => {
