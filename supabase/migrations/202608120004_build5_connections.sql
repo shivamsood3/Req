@@ -1,6 +1,6 @@
 begin;
 
-create table public.connections (
+create table if not exists public.connections (
   id uuid primary key default gen_random_uuid(),
   requirement_id uuid not null references public.requirements(id) on delete cascade,
   request_owner_id uuid not null references public.profiles(id) on delete cascade,
@@ -10,13 +10,17 @@ create table public.connections (
   check (request_owner_id <> responding_broker_id)
 );
 
-create index connections_owner_created_idx
+create index if not exists connections_owner_created_idx
 on public.connections(request_owner_id, created_at desc);
-create index connections_respondent_created_idx
+create index if not exists connections_respondent_created_idx
 on public.connections(responding_broker_id, created_at desc);
 
 alter table public.connections enable row level security;
 revoke all on public.connections from public, anon, authenticated;
+
+drop function if exists public.get_own_response(uuid);
+drop function if exists public.get_responded_requirements();
+drop function if exists public.get_requirement_responses_for_owner(uuid);
 
 create or replace function public.connect_to_response(
   p_requirement_id uuid,

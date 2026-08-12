@@ -11,12 +11,26 @@ const respondedCardPath = new URL("../components/responded-requirement-card.tsx"
 
 test("Build 5 adds scoped connections without storing duplicate contact fields", async () => {
   const sql = await readFile(migrationPath, "utf8");
-  assert.match(sql, /create table public\.connections/i);
+  assert.match(sql, /create table(?: if not exists)? public\.connections/i);
   assert.match(sql, /unique \(requirement_id, responding_broker_id\)/i);
   assert.match(sql, /request_owner_id uuid not null references public\.profiles/i);
   assert.match(sql, /responding_broker_id uuid not null references public\.profiles/i);
   assert.doesNotMatch(sql, /create table public\.(messages|threads|conversations|notifications|chats)/i);
-  assert.doesNotMatch(sql.match(/create table public\.connections[\s\S]*?\);/i)?.[0] ?? "", /mobile|phone|email/i);
+  assert.doesNotMatch(sql.match(/create table(?: if not exists)? public\.connections[\s\S]*?\);/i)?.[0] ?? "", /mobile|phone|email/i);
+});
+
+test("Build 5 drops prior response RPCs before changing their return contracts", async () => {
+  const sql = await readFile(migrationPath, "utf8");
+  for (const name of [
+    "get_own_response",
+    "get_responded_requirements",
+    "get_requirement_responses_for_owner",
+  ]) {
+    const dropIndex = sql.search(new RegExp(`drop function if exists public\\.${name}`, "i"));
+    const createIndex = sql.search(new RegExp(`create or replace function public\\.${name}`, "i"));
+    assert.ok(dropIndex >= 0, `${name} is dropped before recreate`);
+    assert.ok(createIndex > dropIndex, `${name} is recreated after drop`);
+  }
 });
 
 test("connect RPC is owner-derived, live-only, active-response-only, and idempotent", async () => {
