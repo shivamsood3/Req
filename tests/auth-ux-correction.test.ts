@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { normalizeAuthError, validatePasswordPair } from "../lib/auth-errors.ts";
+import { canonicalSiteOrigin, passwordResetRedirectUrl } from "../lib/site-url.ts";
 
 const loginPagePath = new URL("../app/login/page.tsx", import.meta.url);
 const rootPagePath = new URL("../app/page.tsx", import.meta.url);
@@ -12,6 +13,7 @@ const requestFormPath = new URL("../components/request-access-form.tsx", import.
 const forgotFormPath = new URL("../components/forgot-password-form.tsx", import.meta.url);
 const resetFormPath = new URL("../components/reset-password-form.tsx", import.meta.url);
 const resetPagePath = new URL("../app/reset-password/page.tsx", import.meta.url);
+const siteUrlPath = new URL("../lib/site-url.ts", import.meta.url);
 const callbackPath = new URL("../app/auth/callback/route.ts", import.meta.url);
 const confirmPath = new URL("../app/auth/confirm/route.ts", import.meta.url);
 const homePath = new URL("../app/home/page.tsx", import.meta.url);
@@ -70,16 +72,18 @@ test("invalid credentials and duplicate signup are broker-safe messages", () => 
 });
 
 test("forgot and reset password use Supabase recovery only, not normal magic-link login", async () => {
-  const [forgot, reset, resetPage, callback, confirm, config] = await Promise.all([
+  const [forgot, reset, resetPage, siteUrl, callback, confirm, config] = await Promise.all([
     readFile(forgotFormPath, "utf8"),
     readFile(resetFormPath, "utf8"),
     readFile(resetPagePath, "utf8"),
+    readFile(siteUrlPath, "utf8"),
     readFile(callbackPath, "utf8"),
     readFile(confirmPath, "utf8"),
     readFile(supabaseConfigPath, "utf8"),
   ]);
   assert.match(forgot, /resetPasswordForEmail/);
-  assert.match(forgot, /\/reset-password/);
+  assert.match(forgot, /passwordResetRedirectUrl\(window\.location\.origin\)/);
+  assert.match(siteUrl, /\/reset-password/);
   assert.match(reset, /exchangeCodeForSession/);
   assert.match(reset, /verifyOtp/);
   assert.match(reset, /setSession/);
@@ -92,7 +96,26 @@ test("forgot and reset password use Supabase recovery only, not normal magic-lin
   assert.match(confirm, /verifyOtp/);
   assert.match(config, /https:\/\/req-sand\.vercel\.app\/reset-password/);
   assert.match(config, /https:\/\/req-sand\.vercel\.app\/auth\/confirm/);
-  assert.doesNotMatch(`${forgot}\n${reset}\n${callback}\n${confirm}`, /signInWithOtp|Send magic link/i);
+  assert.doesNotMatch(`${forgot}\n${reset}\n${callback}\n${confirm}`, /\$\{window\.location\.origin\}\/reset-password|signInWithOtp|Send magic link/i);
+});
+
+test("password reset links use the public production origin when opened from protected Vercel URLs", () => {
+  assert.equal(
+    canonicalSiteOrigin("https://req-shivamsood3s-projects.vercel.app", ""),
+    "https://req-sand.vercel.app",
+  );
+  assert.equal(
+    canonicalSiteOrigin("https://req-sand.vercel.app", "https://req-shivamsood3s-projects.vercel.app"),
+    "https://req-sand.vercel.app",
+  );
+  assert.equal(
+    passwordResetRedirectUrl("https://req-shivamsood3s-projects.vercel.app"),
+    "https://req-sand.vercel.app/reset-password",
+  );
+  assert.equal(
+    canonicalSiteOrigin("http://localhost:3000", "http://localhost:3000"),
+    "http://localhost:3000",
+  );
 });
 
 test("home shows the public live market before login and broker feed after approval", async () => {

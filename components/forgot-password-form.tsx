@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { normalizeAuthError } from "@/lib/auth-errors";
+import { passwordResetRedirectUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/client";
 
 export function ForgotPasswordForm() {
@@ -27,7 +28,7 @@ export function ForgotPasswordForm() {
     }
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: passwordResetRedirectUrl(window.location.origin),
     });
 
     if (resetError) {
