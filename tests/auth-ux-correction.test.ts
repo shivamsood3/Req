@@ -4,6 +4,7 @@ import test from "node:test";
 import { normalizeAuthError, validatePasswordPair } from "../lib/auth-errors.ts";
 
 const loginPagePath = new URL("../app/login/page.tsx", import.meta.url);
+const rootPagePath = new URL("../app/page.tsx", import.meta.url);
 const loginFormPath = new URL("../components/login-form.tsx", import.meta.url);
 const requestPagePath = new URL("../app/request-access/page.tsx", import.meta.url);
 const requestFormPath = new URL("../components/request-access-form.tsx", import.meta.url);
@@ -13,6 +14,8 @@ const resetPagePath = new URL("../app/reset-password/page.tsx", import.meta.url)
 const callbackPath = new URL("../app/auth/callback/route.ts", import.meta.url);
 const confirmPath = new URL("../app/auth/confirm/route.ts", import.meta.url);
 const homePath = new URL("../app/home/page.tsx", import.meta.url);
+const appShellPath = new URL("../components/app-shell.tsx", import.meta.url);
+const adminLayoutPath = new URL("../app/admin/layout.tsx", import.meta.url);
 const profileActionPath = new URL("../app/profile-setup/actions.ts", import.meta.url);
 const publicFeedPath = new URL("../components/public-feed.tsx", import.meta.url);
 const publicFeedComponentPath = new URL("../components/public-feed.tsx", import.meta.url);
@@ -97,6 +100,22 @@ test("home shows the public live market before login and broker feed after appro
   assert.match(home, /getBrokerLiveRequirements\(filters\)/);
   assert.match(publicFeed, /basePath = "\/"/);
   assert.doesNotMatch(home, /requireApprovedBroker/);
+});
+
+test("domain root routes signed-in users into the app and signed-in chrome can sign out", async () => {
+  const [rootPage, appShell, adminLayout] = await Promise.all([
+    readFile(rootPagePath, "utf8"),
+    readFile(appShellPath, "utf8"),
+    readFile(adminLayoutPath, "utf8"),
+  ]);
+  assert.match(rootPage, /getSessionProfile/);
+  assert.match(rootPage, /if \(user\) redirect\(resolvePostAuthRoute\(profile\)\)/);
+  assert.match(rootPage, /dynamic = "force-dynamic"/);
+  assert.match(appShell, /profile\.full_name/);
+  assert.match(appShell, /action=\{signOut\}/);
+  assert.match(appShell, /Sign out/);
+  assert.match(adminLayout, /action=\{signOut\}/);
+  assert.match(adminLayout, /Sign out/);
 });
 
 test("existing auth user IDs, ownership, and match responses remain based on auth.uid", async () => {

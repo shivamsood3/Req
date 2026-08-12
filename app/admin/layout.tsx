@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signOut } from "@/app/actions";
 import { Brand } from "@/components/brand";
 import { requireAdmin } from "@/lib/auth";
 
@@ -13,6 +14,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <nav aria-label="Admin navigation">
           <Link href="/admin">Overview</Link>
           <Link href="/admin/brokers">Broker approvals</Link>
+          <form action={signOut}>
+            <button className="admin-signout" type="submit">Sign out</button>
+          </form>
         </nav>
       </header>
       <main className="admin-main">{children}</main>
