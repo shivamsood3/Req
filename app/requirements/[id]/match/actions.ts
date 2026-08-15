@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedBroker } from "@/lib/auth";
+import { sendPushForEventKey } from "@/lib/notifications";
 import {
   matchOptionFields,
   validateMatchOption,
@@ -18,7 +19,7 @@ export async function submitMatch(
   _previousState: MatchActionState,
   formData: FormData,
 ): Promise<MatchActionState> {
-  await requireApprovedBroker();
+  const { user } = await requireApprovedBroker();
   const requirementId = String(formData.get("requirement_id") ?? "");
   const fields = matchOptionFields(formData);
   if (!UUID.test(requirementId)) return { errors: { form: "This REQ could not be found." }, values: fields };
@@ -52,5 +53,6 @@ export async function submitMatch(
   revalidatePath(`/requirements/${requirementId}`);
   revalidatePath(`/requirements/${requirementId}/my-response`);
   revalidatePath(`/requirements/${requirementId}/matches`);
+  await sendPushForEventKey(`new_match:${requirementId}:${user.id}`);
   redirect(`/requirements/${requirementId}/my-response?sent=1`);
 }

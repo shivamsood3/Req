@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireApprovedBroker } from "@/lib/auth";
+import { sendPushForEventKey } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 
 export type ConnectActionState = { error?: string };
@@ -46,5 +47,6 @@ export async function connectToResponse(
   revalidatePath(`/requirements/${requirementId}`);
   revalidatePath(`/requirements/${requirementId}/matches`);
   revalidatePath(`/requirements/${requirementId}/my-response`);
+  await sendPushForEventKey(`connected:${requirementId}:${respondingBrokerId}`);
   redirect(`/requirements/${requirementId}/matches?connected=1`);
 }

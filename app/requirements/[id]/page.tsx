@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { NotificationPrompt } from "@/components/notification-prompt";
 import { OwnerLifecycleActions } from "@/components/owner-lifecycle-actions";
 import { requireApprovedBroker } from "@/lib/auth";
 import { getBrokerRequirement, getOwnRequirement } from "@/lib/data";
@@ -74,6 +75,7 @@ export default async function RequirementDetailPage({
         </Link>
 
         {created ? <p className="requirement-created" role="status">Your REQ is live</p> : null}
+        {created ? <NotificationPrompt /> : null}
         {updated ? <p className="requirement-created" role="status">REQ updated</p> : null}
         {renewed ? <p className="requirement-created" role="status">REQ renewed for 7 days</p> : null}
 

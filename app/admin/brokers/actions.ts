@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
+import { sendPushForEventKey } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 
 export async function reviewBroker(formData: FormData) {
@@ -19,6 +20,7 @@ export async function reviewBroker(formData: FormData) {
     p_decision: decision,
   });
   if (error) throw new Error("The broker review could not be saved.");
+  if (decision === "approved") await sendPushForEventKey(`access_approved:${brokerId}`);
   revalidatePath("/admin");
   revalidatePath("/admin/brokers");
 }

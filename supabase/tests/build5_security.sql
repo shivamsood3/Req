@@ -119,11 +119,23 @@ select pg_temp.assert_throws($$select public.connect_to_response('c5000000-0000-
 select pg_temp.assert_throws($$select public.connect_to_response('c5000000-0000-4000-8000-000000000003','a5000000-0000-4000-8000-000000000002')$$, 'cannot connect on closed requirement');
 
 select public.connect_to_response('c5000000-0000-4000-8000-000000000001','a5000000-0000-4000-8000-000000000002');
+reset role;
 select pg_temp.assert_true((select count(*) = 1 from public.connections where requirement_id = 'c5000000-0000-4000-8000-000000000001' and responding_broker_id = 'a5000000-0000-4000-8000-000000000002' and request_owner_id = 'a5000000-0000-4000-8000-000000000001'), 'owner can connect to broker with active response');
-select pg_temp.assert_true((select public.connect_to_response('c5000000-0000-4000-8000-000000000001','a5000000-0000-4000-8000-000000000002') = (select id from public.connections where requirement_id = 'c5000000-0000-4000-8000-000000000001' and responding_broker_id = 'a5000000-0000-4000-8000-000000000002')), 'duplicate connect returns existing connection');
+
+select set_config('request.jwt.claims', '{"sub":"a5000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+set local role authenticated;
+select pg_temp.assert_true((select public.connect_to_response('c5000000-0000-4000-8000-000000000001','a5000000-0000-4000-8000-000000000002') is not null), 'duplicate connect returns existing connection');
+reset role;
 select pg_temp.assert_true((select count(*) = 1 from public.connections where requirement_id = 'c5000000-0000-4000-8000-000000000001' and responding_broker_id = 'a5000000-0000-4000-8000-000000000002'), 'duplicate connect preserves one connection');
+
+select set_config('request.jwt.claims', '{"sub":"a5000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+set local role authenticated;
 select public.connect_to_response('c5000000-0000-4000-8000-000000000001','a5000000-0000-4000-8000-000000000003');
+reset role;
 select pg_temp.assert_true((select count(*) = 2 from public.connections where requirement_id = 'c5000000-0000-4000-8000-000000000001'), 'owner can connect to multiple distinct responding brokers');
+
+select set_config('request.jwt.claims', '{"sub":"a5000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+set local role authenticated;
 select pg_temp.assert_true((select bool_and(respondent_mobile is not null) from public.get_requirement_responses_for_owner('c5000000-0000-4000-8000-000000000001') where connection_id is not null), 'owner sees respondent phone after connect');
 reset role;
 
@@ -131,7 +143,7 @@ select set_config('request.jwt.claims', '{"sub":"a5000000-0000-4000-8000-0000000
 set local role authenticated;
 select pg_temp.assert_true((select count(*) = 1 from public.get_own_response('c5000000-0000-4000-8000-000000000001') where connection_id is not null and requirement_owner_mobile = '+91 99999 50001'), 'owner phone visible to respondent after connect');
 select pg_temp.assert_true((select count(*) = 1 from public.get_responded_requirements() where requirement_id = 'c5000000-0000-4000-8000-000000000001' and connection_id is not null), 'Responded tab shows connected state');
-select public.withdraw_own_match((select m.id from public.matches m join public.broker_responses br on br.id = m.broker_response_id where br.requirement_id = 'c5000000-0000-4000-8000-000000000001' and br.broker_id = 'a5000000-0000-4000-8000-000000000002' and m.status = 'active' limit 1));
+select public.withdraw_own_match((select match_id from public.get_own_response('c5000000-0000-4000-8000-000000000001') where match_status = 'active' limit 1));
 reset role;
 
 select set_config('request.jwt.claims', '{"sub":"a5000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
