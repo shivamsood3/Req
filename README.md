@@ -79,7 +79,7 @@ When Supabase is absent, `next dev` may use the isolated fixtures in `lib/dev-fi
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Build 6 push | Browser-safe Web Push public key |
 | `VAPID_PRIVATE_KEY` | Build 6 push | Server-only Web Push private key |
 | `VAPID_SUBJECT` | Build 6 push | VAPID contact subject, e.g. `mailto:ops@example.com` |
-| `CRON_SECRET` | Build 6 cron | Bearer secret for the hourly expiring-REQ reminder route |
+| `CRON_SECRET` | Build 6 cron | Bearer secret for the expiring-REQ reminder route |
 
 Only the server-side Build 6 push/cron code may use the service-role key. It must never be exposed to browser code.
 
@@ -181,7 +181,7 @@ GET /api/cron/req-expiring
 Authorization: Bearer $CRON_SECRET
 ```
 
-The route runs hourly through `vercel.json` and calls the idempotent database function `generate_req_expiring_notifications()`. Each reminder is keyed by `req_expiring:<requirement_id>:<live_since>`, so a renewal starts a new reminder cycle while repeated hourly runs do not duplicate notifications.
+The route runs daily through `vercel.json` for Vercel Hobby compatibility and calls the idempotent database function `generate_req_expiring_notifications()`. Each reminder is keyed by `req_expiring:<requirement_id>:<live_since>`, so a renewal starts a new reminder cycle while repeated runs do not duplicate notifications.
 
 ## Filtering
 
