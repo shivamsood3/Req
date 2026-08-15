@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { NotificationPrompt } from "@/components/notification-prompt";
 import { OwnerLifecycleActions } from "@/components/owner-lifecycle-actions";
+import { ReportRequirementForm } from "@/components/report-requirement-form";
 import { requireApprovedBroker } from "@/lib/auth";
 import { getBrokerRequirement, getOwnRequirement } from "@/lib/data";
+import { getOwnOpenReport } from "@/lib/reports";
 import {
   formatExpiry,
   formatHistoryTiming,
@@ -52,6 +54,7 @@ export default async function RequirementDetailPage({
 
   const generatedAt = requestTimestamp();
   const isOwn = requirement.brokerId === user.id;
+  const openReport = !isOwn ? await getOwnOpenReport(id) : null;
   const query = await searchParams;
   const created = query.created === "1" && isOwn;
   const updated = query.updated === "1" && isOwn;
@@ -120,11 +123,14 @@ export default async function RequirementDetailPage({
             {effectiveStatus !== "live" ? <Link className="detail-primary-action" href={`/requirements/${id}/matches`}>View matches</Link> : null}
           </div>
         ) : (
-          <Link className="detail-primary-action" href={requirement.ownActiveOptionCount > 0 ? `/requirements/${id}/my-response` : `/requirements/${id}/match`}>
-            {requirement.ownActiveOptionCount > 0
-              ? `View your response · ${requirement.ownActiveOptionCount} ${requirement.ownActiveOptionCount === 1 ? "option" : "options"} sent`
-              : "I have a match"}
-          </Link>
+          <div className="detail-broker-actions">
+            <Link className="detail-primary-action" href={requirement.ownActiveOptionCount > 0 ? `/requirements/${id}/my-response` : `/requirements/${id}/match`}>
+              {requirement.ownActiveOptionCount > 0
+                ? `View your response · ${requirement.ownActiveOptionCount} ${requirement.ownActiveOptionCount === 1 ? "option" : "options"} sent`
+                : "I have a match"}
+            </Link>
+            <ReportRequirementForm requirementId={id} alreadyReported={Boolean(openReport)} />
+          </div>
         )}
       </article>
     </AppShell>

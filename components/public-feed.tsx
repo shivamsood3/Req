@@ -117,6 +117,10 @@ export function PublicFeed({
           </section>
         </div>
       ) : null}
+      <footer className="legal-footer">
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
+      </footer>
     </main>
   );
 }

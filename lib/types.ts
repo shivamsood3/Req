@@ -13,6 +13,7 @@ export type BrokerProfile = {
   status: BrokerStatus;
   approved_at: string | null;
   suspended_at: string | null;
+  deleted_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -176,3 +177,12 @@ export type ActionState = {
   error?: string;
   success?: string;
 };
+
+export type ReportReason =
+  | "fake_requirement"
+  | "spam"
+  | "misleading_information"
+  | "inappropriate_conduct"
+  | "other";
+
+export type ReportStatus = "open" | "resolved" | "dismissed";

@@ -43,7 +43,9 @@ export default async function BrokerApprovalsPage() {
                   <td>
                     <form action={reviewBroker} className="review-actions">
                       <input type="hidden" name="broker_id" value={broker.id} />
-                      <button className="approve-button" name="decision" value="approved" type="submit" disabled={broker.status === "approved"}>Approve</button>
+                      <button className="approve-button" name="decision" value="approved" type="submit" disabled={broker.status === "approved"}>
+                        {broker.status === "suspended" ? "Reactivate" : "Approve"}
+                      </button>
                       <button className="pending-button" name="decision" value="pending" type="submit" disabled={broker.status === "pending"}>Pending</button>
                       <button className="suspend-button" name="decision" value="suspended" type="submit" disabled={broker.status === "suspended"}>Suspend</button>
                       <button className="reject-button" name="decision" value="rejected" type="submit" disabled={broker.status === "rejected"}>Reject</button>

@@ -47,6 +47,10 @@ export async function AppShell({
         <Link href="/post" aria-label="Post a REQ"><span className="nav-add">+</span></Link>
         <Link href="/my-reqs" className={activeNav === "my-reqs" ? "nav-active" : undefined}><span aria-hidden="true">▤</span>My REQs</Link>
       </nav>
+      <footer className="legal-footer app-legal-footer">
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
+      </footer>
     </div>
   );
 }

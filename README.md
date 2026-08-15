@@ -1,12 +1,12 @@
-# REQ V0 — Build 5
+# REQ V0 — Build 7 Pilot Readiness
 
-REQ is a private, mobile-first live requirement exchange for property brokers. Build 5 completes the V0 loop by allowing deliberate owner-initiated contact exchange after a broker submits an active match:
+REQ is a private, mobile-first live requirement exchange for property brokers. Build 7 is the final planned V0 build: it keeps the core loop intact and adds only the pilot-readiness surfaces needed to operate the private network safely.
 
 **POST → MATCH → CONNECT**
 
 REQ is not a property portal, CRM, social network, permanent inventory database, or AI product.
 
-## Build 5 scope
+## Build 7 scope
 
 Included:
 
@@ -41,13 +41,26 @@ Included:
 - Standard `wa.me` WhatsApp handoff with short contextual messages
 - Connected state in owner match inbox, respondent response history, and My REQs Responded
 - Historical connection visibility after a REQ closes/expires or options are withdrawn
-- Database security regression tests for discovery, publication, lifecycle ownership, match privacy, and connection contact privacy
+- Notifications are stored in-app, optional browser push is broker-controlled, and expiring-REQ reminders are generated idempotently
+- Password login, password reset, and the pending approval flow are the normal pilot auth path
+- Authenticated brokers can privately report another broker's live REQ for moderation
+- Admins can review reports, dismiss, warn, suspend a broker, or close a REQ from live discovery
+- Admin broker management supports approve, reject, suspend, and reactivate
+- Admin requirement management can inspect and close REQs without destructive deletion
+- Admin locality management can add, enable, disable, and sort localities
+- Suspended/deactivated brokers lose app access and their live REQs disappear from discovery
+- Account deletion request closes live REQs, revokes access, and anonymizes personal profile fields while preserving relational history
+- Profile settings allow limited broker profile edits, notification status, sign out, and account deletion
+- Admin pilot analytics are aggregate-only and computed from existing timestamps
+- Concise Privacy and Terms pages are linked from public and authenticated shells
+- Database security regression tests for discovery, publication, lifecycle ownership, match privacy, connection contact privacy, notifications, moderation, deletion, analytics, and admin controls
 
 Explicitly out of scope:
 
-- Internal chat, WhatsApp Business API, automated messages, SMS, email notifications, push, or in-app notifications
-- Email exposure
-- Search, analytics, reporting, account deletion, chat, CRM, inventory, social features, payments, images, or AI
+- Internal chat, WhatsApp Business API, automated messages, SMS, email notifications, or AI-generated outreach
+- Email exposure in broker feeds, detail pages, reports, analytics, or connection screens
+- Public report counts, broker reputation scores, ratings, CRM, permanent inventory, social features, payments, images, or AI
+- Any Build 8/post-V0 feature work
 
 ## Stack
 
@@ -97,6 +110,8 @@ Apply in order:
 8. `202608120004_build5_connections.sql`
 9. `20260812071127_bootstrap_admin_access.sql`
 10. `20260815071325_build6_notifications.sql`
+11. `20260815074153_build7_pilot_readiness.sql`
+12. `20260815080200_build7_public_preview_owner_guard.sql`
 
 The Build 0 seed creates South Delhi localities and four development/demo requirements. The Build 1 migration explicitly deletes those four known requirement IDs so they are never represented as genuine production activity.
 
@@ -112,7 +127,7 @@ Public visitors query only `public_requirement_previews`, an aggregated safe vie
 - optional floor preference
 - response count and `live_since`
 
-The view contains no broker identity, profile/contact data, buyer type, urgency, or notes. Its source RLS also enforces the effective-live rule.
+The view contains no broker identity, profile/contact data, buyer type, urgency, or notes. Its source RLS also enforces the effective-live rule. Build 7 excludes suspended/deleted posting brokers through a security-definer owner eligibility helper so anonymous visitors never receive direct `profiles` table access.
 
 Approved brokers use the separate `get_broker_live_requirements` database function. It independently verifies `auth.uid()` belongs to an approved profile and returns live requirement content plus posting broker name/company. Its return contract deliberately excludes mobile and email. Pending, suspended, rejected, and anonymous users receive no broker rows and cannot execute the function anonymously.
 
@@ -183,6 +198,45 @@ Authorization: Bearer $CRON_SECRET
 
 The route runs daily through `vercel.json` for Vercel Hobby compatibility and calls the idempotent database function `generate_req_expiring_notifications()`. Each reminder is keyed by `req_expiring:<requirement_id>:<live_since>`, so a renewal starts a new reminder cycle while repeated runs do not duplicate notifications.
 
+## Pilot checklist
+
+- Admin access is available at `/admin` for broker approvals, moderation, REQ closure, locality controls, and aggregate pilot analytics.
+- Broker profile settings are available at `/profile` with edit, notification status, sign out, account deletion, and Privacy/Terms links.
+- Public and authenticated shells link the concise Privacy/Terms pages.
+- Production requires the Build 7 migration to be applied manually or through the Supabase CLI before deployment traffic uses moderation, profile deletion, admin localities, or analytics.
+
+## Moderation and admin boundary
+
+Build 7 adds private moderation tools without turning REQ into a public reputation system.
+
+- Approved brokers can report another broker's live REQ from the authenticated requirement detail page.
+- Report reasons are controlled values: fake requirement, spam, misleading information, inappropriate conduct, or other.
+- A broker may have only one open report per requirement. Optional notes are capped at 500 characters.
+- The database derives the reported broker from the requirement owner; reporters cannot spoof the target.
+- Reported brokers are not notified automatically and public/broker feeds never expose report counts.
+- Admins review `/admin/reports` and can dismiss, warn, suspend the reported broker, or close the reported REQ.
+- Admins can inspect and close requirements from `/admin/requirements`; REQ uses closure/removal from live discovery rather than destructive deletion.
+- Admins can approve, reject, suspend, and reactivate brokers from `/admin/brokers`.
+- Admins can add, enable, disable, and sort localities from `/admin/localities`. Disabled localities cannot be selected for new REQs or new match options, while historical requirements continue to display their stored locality names.
+
+Suspended brokers fail the same database approval checks used by posting, matching, connecting, lifecycle, notifications, and broker feed functions. Their historical rows remain for integrity, but their live REQs disappear from public and authenticated discovery because feed access requires the posting broker to be approved and not deleted.
+
+## Account deletion boundary
+
+Build 7 provides a safe V0 account deletion request from `/profile`.
+
+- The action requires the signed-in broker to type `DELETE ACCOUNT`.
+- The database closes the broker's live REQs, removes push subscriptions, revokes broker access, and stamps `deleted_at`.
+- Personal profile fields are anonymized where feasible: name becomes `Deleted broker`, and company, mobile, primary market, and RERA values are cleared.
+- Historical requirements, responses, matches, connections, reports, and notifications are preserved so relationship records and admin audit context do not break.
+- Supabase Auth email deletion/anonymization is not performed from client code and must be handled separately by an operator if legally required.
+
+## Pilot analytics boundary
+
+Admin analytics at `/admin` are aggregate-only and computed from existing product timestamps. There is no third-party analytics service and no raw event browser.
+
+Tracked metrics include approved brokers, pending brokers, weekly active brokers, live REQs, REQs posted in the last 7/30 days, REQs with at least one broker response, match rate, connections initiated, connection rate, median time to first response, active match options, responding brokers, and renewals. Weekly active means an approved broker who posted, responded, connected, renewed, or materially updated a REQ within the last seven days.
+
 ## Filtering
 
 Both `/` and `/home` accept validated query parameters:
@@ -218,7 +272,7 @@ In **Supabase → Authentication → Providers → Email**:
 
 Manual admin approval remains the membership gate. If email confirmation remains enabled in the hosted Supabase project, Supabase may still send its confirmation email even though the app no longer asks users to verify. Password reset links should use `/reset-password` as the redirect. The app also supports Supabase token-hash email templates through `/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`.
 
-Approval emails are intentionally separate from Supabase signup confirmation. The current Build 5 app gives admins a basic approval UI at `/admin/brokers`; an automated “your REQ account is approved” email requires a service-role server/Edge Function email sender and is not wired into the client signup flow.
+Approval emails are intentionally separate from Supabase signup confirmation. The Build 7 app gives admins a basic approval UI at `/admin/brokers`; an automated “your REQ account is approved” email requires a service-role server/Edge Function email sender and is not wired into the client signup flow.
 
 Existing users created during the earlier magic-link flow keep the same `auth.users.id`, profile, REQs, responses, and matches. If they do not have a password yet, they should use **Forgot password?** once to set one.
 
@@ -236,7 +290,7 @@ set role = 'admin',
 where email = 'admin@example.com';
 ```
 
-4. Sign out and sign in again with email and password. The basic browser admin panel is available at `/admin/brokers`.
+4. Sign out and sign in again with email and password. The basic browser admin panel is available at `/admin`, with broker approvals at `/admin/brokers`.
 
 ## Tests and checks
 
@@ -250,13 +304,16 @@ where email = 'admin@example.com';
 - `supabase/tests/build4_security.sql` — transactional response grouping, ownership, lifecycle, privacy, count, edit, and withdrawal suite
 - `supabase/tests/build5_security.sql` — transactional Connect/contact privacy, lifecycle, idempotency, and history suite
 - `supabase/tests/build6_security.sql` — transactional notification, push subscription, ownership, read-state, and reminder idempotency suite
+- `supabase/tests/build7_security.sql` — transactional moderation, suspension, deletion, locality admin, and pilot analytics suite
 
 The SQL suite rolls back all test users and requirements.
 
 ## Vercel deployment
 
-The production project is `shivamsood3s-projects/req`. Add the three environment variables to Production, Preview, and Development, deploy with the Next.js preset, then configure the production Supabase callback above. Database migrations are not run by Vercel.
+The production project is `shivamsood3s-projects/req`. Add the required environment variables to Production, Preview, and Development, deploy with the Next.js preset, then configure the production Supabase callback above. Database migrations are not run by Vercel.
 
 ## Build boundary
 
-This repository intentionally stops at Build 6 Notifications + PWA Push. Submit Match, response management, the Responded tab, owner match inbox, connection-scoped mobile sharing, in-app notifications, optional browser push, and expiring-REQ reminders are functional. Normal authentication is email and password. No Build 7 moderation, deletion, analytics, or later product behavior is implemented.
+This repository intentionally stops at Build 7 Pilot Readiness, the final planned V0 build. POST, MATCH, CONNECT, notifications, moderation, account deletion, locality administration, aggregate pilot analytics, profile polish, and legal links are functional. Normal authentication is email and password.
+
+STOP ALL FEATURE DEVELOPMENT AFTER THIS BUILD unless the product scope is explicitly reopened.

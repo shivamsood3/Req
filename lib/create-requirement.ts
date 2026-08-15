@@ -72,6 +72,8 @@ export function validateCreateRequirement(fields: CreateRequirementFields): Crea
 
   if (budgetMin === null || Number.isNaN(budgetMin) || budgetMin <= 0) errors.budgetMin = "Enter a minimum budget above 0.";
   if (budgetMax === null || Number.isNaN(budgetMax) || budgetMax <= 0) errors.budgetMax = "Enter a maximum budget above 0.";
+  if (budgetMin !== null && !Number.isNaN(budgetMin) && budgetMin > 1000) errors.budgetMin = "Enter a realistic budget.";
+  if (budgetMax !== null && !Number.isNaN(budgetMax) && budgetMax > 1000) errors.budgetMax = "Enter a realistic budget.";
   if (budgetMin !== null && budgetMax !== null && !Number.isNaN(budgetMin) && !Number.isNaN(budgetMax) && budgetMax < budgetMin) {
     errors.budgetMax = "Maximum budget must be at least the minimum.";
   }
